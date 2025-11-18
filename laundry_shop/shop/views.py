@@ -2,12 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .forms import ProfileForm
-from .models import Profile
-from django.contrib.auth import authenticate, login
+from .models import Profile, Order     # ✅ Order added
+from django.contrib.auth import authenticate, login, logout
+from django.db.models import Sum       # ✅ Needed for total spent
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
 
 
 def hero(request):
@@ -24,7 +24,7 @@ def login_page(request):
         if user is not None:
             login(request, user)
             messages.success(request, "Login successful!")
-            return redirect("profile")
+            return redirect("dashboard")
         else:
             messages.error(request, "Invalid username or password")
             return redirect("login")
@@ -60,39 +60,31 @@ def signup(request):
 
         # Create user
         user = User.objects.create_user(username=username, email=email, password=password1)
-        user.save()
 
-        # Save profile info
+        # Create Profile on Signup
         profile = Profile.objects.get(user=user)
         profile.latitude = latitude
         profile.longitude = longitude
         profile.save()
 
-        # ---------------------------------
-        # ✅ Send Welcome Email
-        # ---------------------------------
+        # Send Welcome Email
         welcome_message = f"""
 Hi {username},
 
-Welcome to our Bright & Shine! 🎉
+Welcome to Bright & Shine! 🎉
 
 Your account has been created successfully.
 
-We are excited to have you with us. You can now log in and start using all features of our platform.
-
-If you ever need help, feel free to contact us anytime.
-
-Have a great day! 😊
+Enjoy our laundry services anytime — fast & clean! 🧺✨
 """
 
         send_mail(
             subject="🎉 Welcome to Bright & Shine",
             message=welcome_message,
-            from_email=settings.EMAIL_HOST_USER,   # use your Gmail
+            from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
             fail_silently=False,
         )
-        # ---------------------------------
 
         messages.success(request, "Account created successfully! Check your email.")
         return redirect("login")
@@ -109,6 +101,7 @@ def logout_user(request):
     logout(request)
     return redirect("login")
 
+
 @login_required
 def edit_profile(request):
     profile = request.user.profile
@@ -119,7 +112,6 @@ def edit_profile(request):
         if form.is_valid():
             profile = form.save(commit=False)
 
-            # Save Latitude & Longitude manually
             profile.latitude = request.POST.get("latitude")
             profile.longitude = request.POST.get("longitude")
 
@@ -133,3 +125,19 @@ def edit_profile(request):
         form = ProfileForm(instance=profile)
 
     return render(request, "edit_profile.html", {"form": form, "profile": profile})
+
+
+# -------------------------------
+# ✅ USER DASHBOARD
+# -------------------------------
+@login_required
+def user_dashboard(request):
+    pending = Order.objects.filter(user=request.user, status="Pending").count()
+    completed = Order.objects.filter(user=request.user, status="Completed").count()
+    spent = Order.objects.filter(user=request.user).aggregate(total=Sum('amount'))["total"] or 0
+
+    return render(request, "user_dashboard.html", {
+        "pending_count": pending,
+        "completed_count": completed,
+        "total_spent": spent,
+    })

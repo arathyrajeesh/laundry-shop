@@ -4,62 +4,33 @@
 <head>
     <title>Edit Profile</title>
     <style>
-        body {
-            font-family: Arial;
-            background: #eef3ff;
-            padding: 40px;
-        }
-
+        body { font-family: Arial; background: #eef3ff; padding: 40px; }
         .form-box {
             max-width: 450px;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: white; padding: 25px; border-radius: 10px;
+            margin: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-
         input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 15px;
+            border-radius: 6px; border: 1px solid #ccc;
         }
-
         button {
-            padding: 10px;
-            width: 100%;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 10px; width: 100%; background: #3498db; color: white;
+            border: none; border-radius: 6px; cursor: pointer;
         }
-
-        #detectBtn {
-            background: #27ae60;
-            margin-top: -5px;
-        }
-
-        #place_result {
-            font-weight: bold;
-            color: #333;
-        }
+        #detectBtn { background: #27ae60; margin-top: -5px; }
+        #place_result { font-weight: bold; color: #333; }
     </style>
 </head>
 
 <body>
-
 <div class="form-box">
 
     <h2>Edit Profile</h2>
 
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-
-        {{ form.full_name.label }}
+        {{ form.full_name.label }}  
         {{ form.full_name }}
 
         {{ form.phone.label }}
@@ -127,6 +98,5 @@ function getPlaceName(lat, lon) {
         });
 }
 </script>
-
 </body>
 </html>

@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef3ff;
+            padding: 40px;
+        }
+
+        .form-box {
+            max-width: 450px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        #detectBtn {
+            background: #27ae60;
+            margin-top: -5px;
+        }
+
+        #place_result {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="form-box">
+
+    <h2>Edit Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.full_name.label }}
+        {{ form.full_name }}
+
+        {{ form.phone.label }}
+        {{ form.phone }}
+
+        {{ form.profile_image.label }}
+        {{ form.profile_image }}
+
+        <label>Latitude:</label>
+        <input type="text" id="latitude" name="latitude" value="{{ profile.latitude }}" readonly>
+
+        <label>Longitude:</label>
+        <input type="text" id="longitude" name="longitude" value="{{ profile.longitude }}" readonly>
+
+        <p><strong>Detected Place:</strong> <span id="place_result">Not detected</span></p>
+
+        <button type="button" id="detectBtn">📍 Auto-detect Location</button>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+</div>
+
+<script>
+document.getElementById("detectBtn").addEventListener("click", function () {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+        alert("Geolocation not supported");
+    }
+});
+
+function success(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    document.getElementById("latitude").value = lat;
+    document.getElementById("longitude").value = lon;
+
+    getPlaceName(lat, lon);
+}
+
+function error() {
+    alert("Please allow location access.");
+}
+
+function getPlaceName(lat, lon) {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.address) {
+                document.getElementById("place_result").innerText =
+                    data.address.city ||
+                    data.address.town ||
+                    data.address.village ||
+                    data.address.state ||
+                    data.address.country ||
+                    "Unknown place";
+            }
+        })
+        .catch(() => {
+            document.getElementById("place_result").innerText = "Unable to fetch place";
+        });
+}
+</script>
+
+</body>
+</html>

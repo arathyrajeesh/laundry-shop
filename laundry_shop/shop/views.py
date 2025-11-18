@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
+from .forms import ProfileForm
 from .models import Profile
 from django.contrib.auth import authenticate, login
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 
 def hero(request):
@@ -21,7 +24,7 @@ def login_page(request):
         if user is not None:
             login(request, user)
             messages.success(request, "Login successful!")
-            return redirect("home")
+            return redirect("profile")
         else:
             messages.error(request, "Invalid username or password")
             return redirect("login")
@@ -95,3 +98,38 @@ Have a great day! 😊
         return redirect("login")
 
     return render(request, "signup.html")
+
+
+@login_required
+def profile_page(request):
+    return render(request, "profile.html")
+
+
+def logout_user(request):
+    logout(request)
+    return redirect("login")
+
+@login_required
+def edit_profile(request):
+    profile = request.user.profile
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+
+        if form.is_valid():
+            profile = form.save(commit=False)
+
+            # Save Latitude & Longitude manually
+            profile.latitude = request.POST.get("latitude")
+            profile.longitude = request.POST.get("longitude")
+
+            profile.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect("profile")
+        else:
+            messages.error(request, "Invalid data submitted!")
+
+    else:
+        form = ProfileForm(instance=profile)
+
+    return render(request, "edit_profile.html", {"form": form, "profile": profile})

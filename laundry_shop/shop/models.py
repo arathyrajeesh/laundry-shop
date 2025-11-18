@@ -14,10 +14,6 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=[("Pending", "Pending"), ("Completed", "Completed")])
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 class LaundryShop(models.Model):
     name = models.CharField(max_length=100)
@@ -28,3 +24,19 @@ class LaundryShop(models.Model):
 
     def __str__(self):
         return self.name
+
+class Order(models.Model):
+    STATUS_CHOICES = (
+        ("Pending", "Pending"),
+        ("Washing", "Washing"),
+        ("Drying", "Drying"),
+        ("Ironing", "Ironing"),
+        ("Ready", "Ready for Pickup"),
+        ("Completed", "Completed"),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    shop = models.ForeignKey(LaundryShop, on_delete=models.SET_NULL, null=True)
+    cloth_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Replicating key styles for consistency */
+        body { background: #f7f7f7; font-family: "Poppins", sans-serif; }
+        .page-container { max-width: 900px; margin: 40px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        .page-header { font-size: 30px; font-weight: 600; color: #0f334bff; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .setting-group { margin-bottom: 30px; }
+        .setting-group h3 { font-size: 20px; color: #333; margin-bottom: 15px; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eee; }
+        .setting-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <h1 class="page-header">User Settings ⚙️</h1>
+
+        <div class="setting-group">
+            <h3>Account Preferences</h3>
+            <div class="setting-item">
+                <span>Change Password</span>
+                <a href="#" style="color: #0f334bff; text-decoration: none;">Edit</a>
+            </div>
+            <div class="setting-item">
+                <span>Email Notifications</span>
+                <input type="checkbox" checked>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <h3>Privacy</h3>
+            <div class="setting-item">
+                <span>View Data Policy</span>
+                <a href="#" style="color: #0f334bff; text-decoration: none;">View</a>
+            </div>
+            <div class="setting-item">
+                <span>Delete Account</span>
+                <button style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

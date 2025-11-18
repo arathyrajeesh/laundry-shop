@@ -1,139 +1,364 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>User Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Shine & Bright</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
     <style>
+        /* Base CSS (Keep consistent) */
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial;
-            background: #eef3ff;
-            padding: 30px;
+            background: #f7f7f7;
+        }
+        
+        :root {
+            --primary-color: #0f334bff;
+            --hover-color: #f0f0f0;
         }
 
-        .dashboard {
-            max-width: 900px;
-            margin: auto;
+        .section-container {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        .header-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
+        .welcome-header {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
         }
 
-        .profile-img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 20px;
-            border: 3px solid #ddd;
+        .sub-text {
+            color: #666;
+            margin-bottom: 30px;
         }
 
-        .welcome {
-            font-size: 22px;
-            font-weight: bold;
+        .section-heading {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
         }
 
-        .card-grid {
-            margin-top: 30px;
+        .shop-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
         }
 
         .card {
             background: white;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0px 3px 15px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
         }
 
         .card h3 {
-            margin-bottom: 10px;
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .card .status {
+            font-weight: 600;
+            color: #28a745; 
+            margin-top: 10px;
+            display: block;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #0b2737; 
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 3px 15px rgba(0,0,0,0.1);
+        }
+
+        .status-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        .status-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-table tr:nth-child(even) {
+            background-color: #f9f9f9; 
+        }
+
+        .status-table .status-text {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .empty-message {
+            color: #999;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        /* --- NEW DROPDOWN CSS --- */
+        .profile-pic-container {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            z-index: 100; /* Ensure it stays above other content */
+        }
+        
+        .profile-pic {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer; /* Indicate it's clickable */
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 75px; /* Position below the profile pic */
+            right: 0;
+            width: 300px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px 0;
+            display: none; /* Hidden by default */
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .dropdown-header .profile-pic-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .dropdown-header h4 {
+            font-size: 16px;
+            font-weight: 600;
             color: #333;
         }
 
-        .card p {
-            font-size: 18px;
-            color: #555;
+        .dropdown-header p {
+            font-size: 13px;
+            color: #666;
         }
 
-        .actions {
-            margin-top: 30px;
-        }
-
-        .action-btn {
+        .dropdown-header .view-profile-btn {
             display: block;
-            text-decoration: none;
-            background: #3498db;
-            color: white;
             text-align: center;
-            padding: 14px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            font-size: 18px;
+            padding: 8px 15px;
+            margin: 15px 20px 0;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: background 0.3s;
         }
 
-        .action-btn.green {
-            background: #2ecc71;
+        .dropdown-header .view-profile-btn:hover {
+            background: var(--primary-color);
+            color: white;
         }
 
-        .action-btn.red {
-            background: #e74c3c;
+        .dropdown-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            padding: 5px 20px;
+            margin-top: 10px;
         }
+
+        .dropdown-item a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item a:hover {
+            background: var(--hover-color);
+            color: var(--primary-color);
+        }
+
+        .sign-out {
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            margin-top: 15px;
+        }
+
     </style>
 </head>
-
 <body>
 
-<div class="dashboard">
+    <div class="profile-pic-container">
+        <img id="profile-trigger"
+                src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'default.png' %}{% endif %}" 
+                alt="Profile Picture" 
+                class="profile-pic">
 
-    <!-- USER HEADER -->
-    <div class="header-box">
-        {% if user.profile.profile_image %}
-        <img src="{{ user.profile.profile_image.url }}" class="profile-img">
-        {% else %}
-        <img src="{% static 'default.png' %}" class="profile-img">
-        {% endif %}
+        <div id="profile-dropdown-menu" class="profile-dropdown">
+            
+            <div class="dropdown-header">
+                <img src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'default.png' %}{% endif %}" 
+                        alt="User Profile" 
+                        class="profile-pic-small">
+                <div>
+                    <h4>{{ request.user.username }}</h4>
+                    <p>Customer Account</p>
+                </div>
+                <a href="{% url 'edit_profile' %}" class="view-profile-btn">View Profile</a>
+            </div>
+
+            <div class="dropdown-section-title">Account</div>
+            <div class="dropdown-item"><a href="{% url 'settings' %}">Settings & Privacy</a></div>
+            <div class="dropdown-item"><a href="{% url 'help' %}">Help</a></div>
+            <div class="dropdown-item"><a href="{% url 'language_settings' %}">Language</a></div>
+
+            <div class="dropdown-section-title">Manage</div>
+            <div class="dropdown-item"><a href="{% url 'orders' %}">My Orders</a></div>
+            <div class="dropdown-item"><a href="{% url 'billing' %}">Billing & Payments</a></div>
+
+            <div class="dropdown-item sign-out"><a href="{% url 'logout' %}">Sign Out</a></div>
+
+        </div>
+    </div>
+
+    <div class="section-container">
+        <h1 class="welcome-header">
+            👋 Welcome, {{ request.user.username }}
+        </h1>
+        <p class="sub-text">
+            Here are your laundry options and cloth status.
+        </p>
+
+        <div class="mb-10">
+            <h2 class="section-heading">🏪 Current Available Laundry Shops</h2>
+            <div class="shop-grid">
+                {% for shop in shops %}
+                    <div class="card">
+                        <h3>{{ shop.name }}</h3>
+                        <p class="text-gray-600 text-sm mt-1">{{ shop.address }}</p>
+                        <span class="status">Open Now</span>
+                        <a href="{% url 'shop_detail' shop.id %}" class="btn">View Shop</a>
+                    </div>
+                {% empty %}
+                    <p class="empty-message">No shops available right now.</p>
+                {% endfor %}
+            </div>
+        </div>
 
         <div>
-            <p class="welcome">Welcome, {{ user.profile.full_name }}</p>
-            <p>Email: {{ user.email }}</p>
+            <h2 class="section-heading">🧺 Your Cloth Status</h2>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Cloth</th>
+                        <th>Status</th>
+                        <th>Delivered On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cloth in cloth_status %}
+                        <tr>
+                            <td>{{ cloth.cloth_name }}</td>
+                            <td class="status-text">{{ cloth.status }}</td>
+                            <td>
+                                {% if cloth.delivery_date %}
+                                    {{ cloth.delivery_date }}
+                                {% else %}
+                                    Not yet delivered
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="empty-message">
+                                No cloth status available.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- SUMMARY CARDS -->
-    <div class="card-grid">
-        <div class="card">
-            <h3>Pending Clothes</h3>
-            <p>{{ pending_count }}</p>
-        </div>
+    <script>
+        document.getElementById('profile-trigger').addEventListener('click', function() {
+            var dropdown = document.getElementById('profile-dropdown-menu');
+            dropdown.classList.toggle('show');
+        });
 
-        <div class="card">
-            <h3>Completed Orders</h3>
-            <p>{{ completed_count }}</p>
-        </div>
-
-        <div class="card">
-            <h3>Total Spent</h3>
-            <p>₹ {{ total_spent }}</p>
-        </div>
-    </div>
-
-    <!-- QUICK ACTIONS -->
-    <div class="actions">
-        <a href="{% url 'request_pickup' %}" class="action-btn green">Request Pickup</a>
-        <a href="{% url 'my_orders' %}" class="action-btn">View My Orders</a>
-        <a href="{% url 'wallet' %}" class="action-btn">Wallet / Payments</a>
-        <a href="{% url 'complaints' %}" class="action-btn red">Raise a Complaint</a>
-    </div>
-
-</div>
+        // Optional: Close dropdown if user clicks outside
+        window.addEventListener('click', function(e) {
+            var container = document.querySelector('.profile-pic-container');
+            if (!container.contains(e.target) && document.getElementById('profile-dropdown-menu').classList.contains('show')) {
+                document.getElementById('profile-dropdown-menu').classList.remove('show');
+            }
+        });
+    </script>
 
 </body>
 </html>

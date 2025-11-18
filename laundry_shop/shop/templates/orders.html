@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f7f7f7; font-family: "Poppins", sans-serif; }
+        .page-container { max-width: 1000px; margin: 40px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        .page-header { font-size: 30px; font-weight: 600; color: #0f334bff; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .order-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; padding: 15px; }
+        .order-header { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 10px; }
+        .order-status { font-size: 14px; padding: 5px 10px; border-radius: 5px; }
+        .status-processing { background: #ffc107; color: #333; }
+        .status-delivered { background: #28a745; color: white; }
+        .order-details p { font-size: 14px; color: #666; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <h1 class="page-header">My Orders 🧺</h1>
+
+        <h2>Current Orders</h2>
+        <div class="order-card">
+            <div class="order-header">
+                <span>Order #1001</span>
+                <span class="order-status status-processing">In Process</span>
+            </div>
+            <div class="order-details">
+                <p>Items: 5 Shirts, 2 Pants</p>
+                <p>Scheduled Pickup: 2025-11-19, 10:00 AM</p>
+                <p>Estimated Delivery: 2025-11-21</p>
+                <a href="#" style="color: #0f334bff; text-decoration: none; font-size: 14px; margin-top: 5px; display: inline-block;">View Details</a>
+            </div>
+        </div>
+        
+        <h2 style="margin-top: 30px;">Past Orders</h2>
+        <div class="order-card">
+            <div class="order-header">
+                <span>Order #987</span>
+                <span class="order-status status-delivered">Delivered</span>
+            </div>
+            <div class="order-details">
+                <p>Items: 1 Bed Sheet, 3 Towels</p>
+                <p>Delivered On: 2025-11-10</p>
+                <p>Total Cost: ₹250</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

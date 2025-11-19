@@ -1,50 +1,181 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Your Profile</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile - Shine & Bright</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: Arial; background: #f4f7ff; padding: 40px; }
-        .profile-box {
-            max-width: 450px; background: white; padding: 25px;
-            border-radius: 12px; margin: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            box-sizing: border-box;
         }
-        h2 { text-align: center; color: #333; }
-        p { font-size: 16px; margin: 8px 0; }
-        .btn {
-            display: block; width: 100%; padding: 10px;
-            background: #3498db; color: white;
-            text-align: center; border-radius: 8px;
-            margin-top: 20px; text-decoration: none;
+
+        body {
+            background: #f7f7f7;
+            padding: 40px;
         }
-        .edit-btn { background: #2ecc71; }
+
+        :root {
+            --primary-color: #0f334bff;
+            --hover-color: #f0f0f0;
+        }
+
+        .profile-container {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-header h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
         .profile-img {
-            width: 120px; height: 120px; border-radius: 50%;
-            object-fit: cover; display: block; margin: 10px auto;
-            border: 3px solid #ddd;
+            width: 135px;
+            height: 135px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 15px auto;
+            display: block;
+        }
+
+        .info-card {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .info-item {
+            margin-bottom: 12px;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-value {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-box {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 8px;
+            transition: 0.3s;
+        }
+
+        .edit-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #0b2737;
+        }
+
+        .logout-btn {
+            background: #d9534f;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background: #b52b27;
+        }
+
+        .section-title {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .location-text {
+            font-weight: 500;
+            color: #444;
         }
     </style>
 </head>
 
 <body>
 
-<div class="profile-box">
-
-    <h2>Your Profile</h2>
+<div class="profile-container">
+    
+    <div class="profile-header">
+        <h2>Your Profile</h2>
+    </div>
 
     {% if user.profile.profile_image %}
-        <img src="{{ user.profile.profile_image.url }}" class="profile-img">
+        <img src="{{ user.profile.profile_image.url }}" class="profile-img" alt="Profile Picture">
     {% else %}
-        <img src="{% static 'default.png' %}" class="profile-img">
+        <img src="{% static 'default.png' %}" class="profile-img" alt="No Profile Picture">
     {% endif %}
 
-    <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Full Name:</strong> {{ user.profile.full_name }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Phone:</strong> {{ user.profile.phone }}</p>
+    <div class="info-card">
 
-    <p><strong>Place:</strong> <span id="place_name">Loading...</span></p>
+        <div class="info-item">
+            <div class="info-label">Username</div>
+            <div class="info-value">{{ user.username }}</div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">Full Name</div>
+            <div class="info-value">{{ user.profile.full_name|default:"Not provided" }}</div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ user.email }}</div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">Phone</div>
+            <div class="info-value">{{ user.profile.phone|default:"Not provided" }}</div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">Location</div>
+            <div class="info-value location-text" id="place_name">Loading...</div>
+        </div>
+
+    </div>
+
+    <div class="btn-box">
+        <a href="{% url 'edit_profile' %}" class="btn edit-btn">Edit Profile</a>
+        <a href="{% url 'logout' %}" class="btn logout-btn">Logout</a>
+    </div>
 
 </div>
 
@@ -66,7 +197,7 @@ function getPlaceName(lat, lon) {
             }
         })
         .catch(() => {
-            document.getElementById("place_name").innerText = "Unable to load place";
+            document.getElementById("place_name").innerText = "Unable to load location";
         });
 }
 
@@ -79,9 +210,6 @@ if (lat && lon) {
     document.getElementById("place_name").innerText = "Location not set";
 }
 </script>
-
-<a href="{% url 'edit_profile' %}" class="btn edit-btn">Edit Profile</a>
-<a href="{% url 'logout' %}" class="btn">Logout</a>
 
 </body>
 </html>

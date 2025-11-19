@@ -269,13 +269,13 @@
                     <h4>{{ request.user.username }}</h4>
                     <p>Customer Account</p>
                 </div>
-                <a href="{% url 'edit_profile' %}" class="view-profile-btn">View Profile</a>
+                <a href="{% url 'profile' %}" class="view-profile-btn">View Profile</a>
             </div>
 
             <div class="dropdown-section-title">Account</div>
             <div class="dropdown-item"><a href="{% url 'settings' %}">Settings & Privacy</a></div>
             <div class="dropdown-item"><a href="{% url 'help' %}">Help</a></div>
-            <div class="dropdown-item"><a href="{% url 'language_settings' %}">Language</a></div>
+            <div class="dropdown-item"><a href="{% url 'language' %}">Language</a></div>
 
             <div class="dropdown-section-title">Manage</div>
             <div class="dropdown-item"><a href="{% url 'orders' %}">My Orders</a></div>

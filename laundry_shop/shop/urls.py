@@ -23,4 +23,18 @@ urlpatterns = [
     path("language/", views.language_settings, name="language"),
     path("orders/", views.my_orders, name="orders"),
     path("billing/", views.billing_payments, name="billing"),
+
+    # ADMIN DASHBOARD
+    path("admin-dashboard/", views.admin_dashboard, name="admin_dashboard"),
+    path("admin/orders/", views.admin_orders, name="admin_orders"),
+    path("admin/users/", views.admin_users, name="admin_users"),
+    path("admin/shops/", views.admin_shops, name="admin_shops"),
+    path("admin/order/<int:order_id>/update-status/", views.admin_update_order_status, name="admin_update_order_status"),
+
+    # SHOP AUTHENTICATION
+    path("shop/register/", views.shop_register, name="shop_register"),
+    path("shop/login/", views.shop_login, name="shop_login"),
+    path("shop/logout/", views.shop_logout, name="shop_logout"),
+    path("shop/dashboard/", views.shop_dashboard, name="shop_dashboard"),
+    path("shop/order/<int:order_id>/update-status/", views.shop_update_order_status, name="shop_update_order_status"),
 ]

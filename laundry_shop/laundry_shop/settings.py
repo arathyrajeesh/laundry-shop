@@ -137,3 +137,7 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'arathyrajeesh2@gmail.com'
 EMAIL_HOST_PASSWORD = 'kzyjkrzlmfwvqgnd'
+
+# Login URL for redirecting unauthenticated users
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'

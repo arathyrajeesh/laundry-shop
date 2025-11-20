@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -15,12 +17,25 @@ class Profile(models.Model):
         return self.user.username
 
 
+
 class LaundryShop(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)
     address = models.TextField()
     is_open = models.BooleanField(default=True)
     phone = models.CharField(max_length=15)
     image = models.ImageField(upload_to="shops/", blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def set_password(self, raw_password):
+        """Hash and set the password."""
+        self.password = make_password(raw_password)
+        self.save()
+
+    def check_password(self, raw_password):
+        """Check if the provided password is correct."""
+        return check_password(raw_password, self.password)
 
     def __str__(self):
         return self.name

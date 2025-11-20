@@ -39,6 +39,14 @@
             margin-bottom: 30px;
             color: #333;
         }
+        
+        .section-title {
+            text-align:center;
+            font-size: 34px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 45px;
+        }
 
         /* --- NAVBAR --- */
         nav {
@@ -178,13 +186,6 @@
             text-align: center;
         }
 
-        .section-title {
-            font-size: 34px;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 45px;
-        }
-
         .swiper {
             width: 90%;
             max-width: 1200px;
@@ -195,7 +196,7 @@
             display: flex;
             justify-content: center;
         }
-
+        
         .service-card {
             position: relative;
             width: 100%; 
@@ -247,33 +248,325 @@
 
         .service-content h3 { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
         .service-content p { font-size: 15px; margin-top: 5px; line-height: 1.4; max-width: 90%; }
+        
+        /* Price Badge on Service Cards */
+        .service-price {
+            display: inline-block;
+            background: var(--accent-color); /* Bright Green */
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 700;
+            font-size: 16px;
+            margin-top: 10px;
+        }
 
         /* Pagination Dots */
         .swiper-pagination-bullet { background: var(--primary-color); opacity: 1; }
         .swiper-pagination-bullet-active { background: var(--accent-hover); }
         
-        /* --- PRICING & WHY CHOOSE US --- */
-        table { width: 80%; margin: auto; border-collapse: collapse; margin-top: 20px; }
-        table, th, td { border: 1px solid #ccc; }
-        th { background: var(--primary-color); color: white; padding: 12px; }
-        td { padding: 10px; }
-        tr:nth-child(even) { background-color: #f0f0f0; }
+        /* --- PRICING CAROUSEL LAYOUT --- */
+        .pricing-section-container {
+            padding: 60px 0;
+            background: #f9fbff;
+        }
         
+        /* Swiper container for pricing */
+        .pricing-swiper {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto 50px auto;
+            padding-bottom: 50px;
+        }
+        
+        .pricing-container {
+            display: flex;
+            margin-top: 30px;
+            flex-wrap: nowrap; 
+        }
+
+        .pricing-card {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            width: 300px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: space-between; 
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .primary-card {
+            /* REMOVED BORDER: 3px solid var(--primary-color); */
+            box-shadow: 0 8px 20px rgba(15, 51, 75, 0.2);
+        }
+
+        .card-icon-wrapper {
+            background: var(--accent-color);
+            color: white;
+            width: 70px;
+            height: 70px;
+            line-height: 70px;
+            border-radius: 50%;
+            font-size: 30px;
+            margin: 0 auto 15px auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .primary-card .card-icon-wrapper {
+            background: var(--primary-color);
+        }
+
+
+        .pricing-card h3 {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .pricing-card .description {
+            color: #777;
+            font-size: 14px;
+            min-height: 40px; 
+            margin-bottom: 20px;
+        }
+
+        .price-box {
+            margin: 15px 0;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .price-value {
+            font-size: 45px;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .currency, .unit {
+            font-size: 18px;
+            font-weight: 500;
+            color: #555;
+        }
+        .unit { display: block; font-size: 14px; }
+
+        .card-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .card-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .full-price-note {
+            margin-top: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 15px;
+            background-color: #e9eff5;
+            border-radius: 8px;
+            color: var(--primary-color);
+            font-size: 15px;
+        }
+        
+        /* Pagination Dots for Pricing Carousel */
+        .pricing-swiper .swiper-pagination-bullet { background: var(--primary-color); opacity: 1; }
+        .pricing-swiper .swiper-pagination-bullet-active { background: var(--accent-hover); }
+
+        /* --- WHY CHOOSE US --- */
         .why { display: flex; justify-content: center; gap: 40px; margin-top: 30px; flex-wrap: wrap; }
         .why div { width: 280px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 2px 10px rgba(0,0,0,0.1); }
         .why h3 { color: var(--primary-color); }
         .why p { color: #555; }
 
         /* --- FOOTER --- */
-        footer { background: var(--primary-color); color: white; text-align: center; padding: 20px; }
+/* --- FOOTER STYLING --- */
 
+        .pro-laundry-footer {
+            background: #333333; /* Dark background color */
+            color: #cccccc; /* Light grey text color */
+            padding: 60px 40px;
+            font-size: 15px;
+            position: relative; /* Needed for the back-to-top button */
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+            gap: 40px;
+        }
+
+        .footer-col {
+            flex-basis: 30%; /* Give each column about a third of the space */
+            min-width: 250px; /* Ensure columns don't get too narrow */
+            text-align: left;
+        }
+
+        .footer-col h3 {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* --- Brand & About Column --- */
+
+        .footer-brand {
+            font-size: 32px;
+            font-weight: 700;
+            color:white; /* Green color for the logo text */
+            margin-bottom: 20px;
+        }
+
+        .footer-about p {
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .social-icon {
+            width: 35px;
+            height: 35px;
+            background: white;
+            color: #333333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .social-icon:hover {
+            background: #0f334bff;
+            color: white;
+        }
+
+        /* --- Contacts Column --- */
+
+        .footer-contacts ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-contacts li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .footer-contacts li .fas {
+            color: #3f7599ff; /* Green icon color */
+            font-size: 16px;
+        }
+
+        /* --- Newsletter Column --- */
+
+        .footer-newsletter p {
+            margin-bottom: 15px;
+        }
+
+        .newsletter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .newsletter-form input {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .newsletter-form input::placeholder {
+            color: #999;
+        }
+
+        .newsletter-form button {
+            padding: 12px 15px;
+            background: #0f334bff; /* Green button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .newsletter-form button:hover {
+            background: #5c9cc7ff;
+        }
+
+        /* --- Fixed Back-to-Top Button (from the bottom right of your image) --- */
+        .back-to-top-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background:#0f334bff;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+        }
+
+
+        /* Media Query for smaller screens */
+        @media (max-width: 768px) {
+            .pro-laundry-footer {
+                padding: 40px 20px;
+            }
+            .footer-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .footer-col {
+                min-width: 100%;
+            }
+        }
         /* --- MEDIA QUERIES for Responsiveness --- */
         @media (max-width: 1024px) {
             .about-image img { width: 400px; }
             .about-content { max-width: 90%; text-align: center; }
             .about-content h2, .about-list li { text-align: center; }
             .call-box { margin: auto; max-width: 400px; justify-content: flex-start; }
-            /* Adjusted badge positioning for smaller desktop views */
             .experience-badge { bottom: 20px; left: 20px; } 
         }
 
@@ -283,11 +576,9 @@
             .hero h1 { font-size: 36px; }
             .hero p { font-size: 16px; }
             .about-image img { width: 100%; }
-            /* Center badge for mobile */
             .experience-badge { bottom: -20px; left: 50%; transform: translateX(-50%); } 
             .swiper { width: 95%; }
             .section { padding: 40px 15px; }
-            table { width: 100%; }
         }
     </style>
 </head>
@@ -390,6 +681,7 @@
                             <div class="icon-circle"><i class="fas fa-soap"></i></div>
                             <h3>Wash & Fold Laundry</h3>
                             <p>We pick up, wash, dry, fold and deliver your clothes in one neat package.</p>
+                            <span class="service-price">₹60/kg</span>
                         </div>
                     </div>
                 </div>
@@ -401,6 +693,7 @@
                             <div class="icon-circle"><i class="fas fa-home"></i></div>
                             <h3>General Dry Cleaning</h3>
                             <p>Accurate, fast and top-quality dry cleaning trusted by students and residents.</p>
+                            <span class="service-price">Starts at ₹150/item</span>
                         </div>
                     </div>
                 </div>
@@ -412,6 +705,7 @@
                             <div class="icon-circle"><i class="fas fa-broom"></i></div>
                             <h3>Carpet Cleaning</h3>
                             <p>Professional deep cleaning recommended every 12 to 18 months for best results.</p>
+                            <span class="service-price">Call for Quote</span>
                         </div>
                     </div>
                 </div>
@@ -423,6 +717,7 @@
                             <div class="icon-circle"><i class="fas fa-hand-sparkles"></i></div>
                             <h3>Suit & Formal Wear</h3>
                             <p>Special care for delicate garments, shirts, and high-end formal wear.</p>
+                            <span class="service-price">₹250/Suit</span>
                         </div>
                     </div>
                 </div>
@@ -434,6 +729,7 @@
                             <div class="icon-circle"><i class="fas fa-tshirt"></i></div>
                             <h3>Folding & Ironing</h3>
                             <p>Get your clothes perfectly pressed and neatly folded, ready for the closet.</p>
+                            <span class="service-price">₹10/item</span>
                         </div>
                     </div>
                 </div>
@@ -444,37 +740,130 @@
     </section>
 
 
-    <section class="section" id="pricing">
-        <h2>Price List</h2>
+    <section class="pricing-section-container" id="pricing">
+        <h2 class="section-title">Transparent & Affordable Pricing</h2>
+        
+        <div class="swiper pricing-swiper">
+            <div class="swiper-wrapper pricing-container">
+            
+                <div class="swiper-slide">
+                    <div class="pricing-card">
+                        <div>
+                            <div class="card-icon-wrapper"><i class="fas fa-tshirt"></i></div>
+                            <h3>Wash & Fold (Per Kg)</h3>
+                            <p class="description">Ideal for everyday wear. No ironing included.</p>
+                        </div>
+                        <div>
+                            <div class="price-box">
+                                <span class="currency">₹</span>
+                                <span class="price-value">60</span>
+                                <span class="unit">/ kg</span>
+                            </div>
+                            <a href="{% url 'dashboard' %}" class="card-btn">Schedule Pickup</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="swiper-slide">
+                    <div class="pricing-card primary-card">
+                        <div>
+                            <div class="card-icon-wrapper"><i class="fas fa-hand-sparkles"></i></div>
+                            <h3>Wash & Iron (Per Kg)</h3>
+                            <p class="description">Our best value! Get your clothes fresh and pressed.</p>
+                        </div>
+                        <div>
+                            <div class="price-box">
+                                <span class="currency">₹</span>
+                                <span class="price-value">90</span>
+                                <span class="unit">/ kg</span>
+                            </div>
+                            <a href="{% url 'dashboard' %}" class="card-btn">Get Started</a>
+                        </div>
+                    </div>
+                </div>
 
-        <table>
-            <tr>
-                <th>Item</th>
-                <th>Wash</th>
-                <th>Iron</th>
-                <th>Wash & Iron</th>
-            </tr>
-            <tr>
-                <td>Shirt</td>
-                <td>₹20</td>
-                <td>₹10</td>
-                <td>₹25</td>
-            </tr>
-            <tr>
-                <td>Pants</td>
-                <td>₹25</td>
-                <td>₹10</td>
-                <td>₹30</td>
-            </tr>
-            <tr>
-                <td>Bed Sheet</td>
-                <td>₹40</td>
-                <td>₹15</td>
-                <td>₹50</td>
-            </tr>
-        </table>
+                <div class="swiper-slide">
+                    <div class="pricing-card">
+                        <div>
+                            <div class="card-icon-wrapper"><i class="fas fa-suitcase"></i></div>
+                            <h3>Dry Cleaning</h3>
+                            <p class="description">For delicate items, suits, and formal wear. (Per Item)</p>
+                        </div>
+                        <div>
+                            <div class="price-box">
+                                <span class="currency">₹</span>
+                                <span class="price-value">150</span>
+                                <span class="unit">/ item</span>
+                            </div>
+                            <a href="{% url 'dashboard' %}" class="card-btn">View Full List</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="swiper-slide">
+                    <div class="pricing-card">
+                        <div>
+                            <div class="card-icon-wrapper" style="background: #1abc9c;"><i class="fas fa-bed"></i></div>
+                            <h3>Bed Sheet</h3>
+                            <p class="description">Wash & Iron service for large items.</p>
+                        </div>
+                        <div>
+                            <div class="price-box">
+                                <span class="currency">₹</span>
+                                <span class="price-value">50</span>
+                                <span class="unit">/ piece</span>
+                            </div>
+                            <a href="{% url 'dashboard' %}" class="card-btn">Add to Cart</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="swiper-slide">
+                    <div class="pricing-card">
+                        <div>
+                            <div class="card-icon-wrapper" style="background: #e74c3c;"><i class="fas fa-user-tie"></i></div>
+                            <h3>Shirt / T-Shirt</h3>
+                            <p class="description">Wash & Iron service for everyday top wear.</p>
+                        </div>
+                        <div>
+                            <div class="price-box">
+                                <span class="currency">₹</span>
+                                <span class="price-value">25</span>
+                                <span class="unit">/ piece</span>
+                            </div>
+                            <a href="{% url 'dashboard' %}" class="card-btn">Add to Cart</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="swiper-slide">
+                    <div class="pricing-card">
+                        <div>
+                            <div class="card-icon-wrapper" style="background: #f39c12;"><i class="fas fa-socks"></i></div>
+                            <h3>Pants / Trousers</h3>
+                            <p class="description">Wash & Iron service for bottom wear.</p>
+                        </div>
+                        <div>
+                            <div class="price-box">
+                                <span class="currency">₹</span>
+                                <span class="price-value">30</span>
+                                <span class="unit">/ piece</span>
+                            </div>
+                            <a href="{% url 'dashboard' %}" class="card-btn">Add to Cart</a>
+                        </div>
+                    </div>
+                </div>
+            
+            </div>
+
+            <div class="swiper-pagination"></div>
+        </div>
+        
+        <div class="full-price-note">
+            <p><strong>Note:</strong> Pricing for individual items is also available, scroll right to see more options, or click "View Full List" above.</p>
+        </div>
+        
     </section>
-
 
     <section class="section">
         <h2>Why Choose Us?</h2>
@@ -495,14 +884,48 @@
     </section>
 
 
-    <footer id="contact">
-        <p>Contact: 8547189033 | Address: Kannur,Kerala</p>
-        <p>© 2025 LaundryPro – All Rights Reserved</p>
+    <footer class="pro-laundry-footer">
+        <div class="footer-container">
+
+            <div class="footer-col footer-about">
+                <div class="footer-brand">Shine & Bright</div>
+                <p>We are professionals in the laundry and dry cleaning business, which means we always stay up to date on the latest technologies and cleaning methods.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col footer-contacts">
+                <h3>Contacts</h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> 8494 Signal Hill Road Manassas, VA, 20110</li>
+                    <li><i class="fas fa-clock"></i> Mon–Fri: 8am – 5pm</li>
+                    <li><i class="fas fa-clock"></i> Sat–Sun: 10am – 5pm</li>
+                    <li><i class="fas fa-envelope"></i> info@yourlaundrysite.com</li>
+                    <li><i class="fas fa-phone-alt"></i> 1 (800) 765-43-21</li>
+                </ul>
+            </div>
+
+            <div class="footer-col footer-newsletter">
+                <h3>Newsletter Subscribe</h3>
+                <p>Sign up and receive our special offers:</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your e-mail address" required>
+                    <button type="submit">Subscribe now</button>
+                </form>
+            </div>
+
+        </div>
+        <a href="#" class="back-to-top-btn"><i class="fas fa-arrow-up"></i></a>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
+    // 1. SERVICES CAROUSEL (Original)
     var swiper = new Swiper(".mySwiper", {
         loop: true,
         centeredSlides: true,
@@ -519,6 +942,22 @@
         breakpoints: {
             600: { slidesPerView: 2, spaceBetween: 30 },
             1024: { slidesPerView: 3, spaceBetween: 40 }
+        }
+    });
+
+    // 2. PRICING CAROUSEL (NEW)
+    var pricingSwiper = new Swiper(".pricing-swiper", {
+        loop: true,
+        spaceBetween: 20,
+        grabCursor: true,
+        pagination: {
+            el: ".pricing-swiper .swiper-pagination",
+            clickable: true,
+        },
+        breakpoints: {
+            480: { slidesPerView: 1.1, spaceBetween: 20, centeredSlides: true }, // One card + hint on small mobile
+            768: { slidesPerView: 2, spaceBetween: 30 }, // Two cards on tablet
+            1024: { slidesPerView: 3, spaceBetween: 30 }  // Three cards on desktop
         }
     });
     </script>

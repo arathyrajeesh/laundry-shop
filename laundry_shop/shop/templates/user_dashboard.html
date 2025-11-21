@@ -378,7 +378,7 @@
                             {% else %}
                                 <span class="status" style="background: #17a2b8;">Price on Request</span>
                             {% endif %}
-                            <a href="{% url 'shop_detail' service.branch.shop.id %}" class="btn">View Shop</a>
+                            <a href="{% url 'branch_detail' service.branch.id %}" class="btn">Book Service</a>
                         </div>
                     {% endfor %}
                 </div>

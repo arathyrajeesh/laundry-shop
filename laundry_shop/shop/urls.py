@@ -16,6 +16,7 @@ urlpatterns = [
 
     # SHOPS
     path("shop/<int:shop_id>/", views.shop_detail, name="shop_detail"),
+    path("branch/<int:branch_id>/", views.branch_detail, name="branch_detail"),
 
     # DROPDOWN PAGES
     path("settings/", views.settings_view, name="settings"),

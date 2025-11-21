@@ -270,8 +270,42 @@ def billing_payments(request):
 @login_required
 def shop_detail(request, shop_id):
     """Renders a single laundry shop's detail page."""
-    shop = get_object_or_404(LaundryShop, id=shop_id)
-    return render(request, 'shop_detail.html', {'shop': shop})
+    shop = get_object_or_404(LaundryShop, id=shop_id, is_approved=True)
+
+    # Get all branches for this shop
+    branches = Branch.objects.filter(shop=shop).prefetch_related('services')
+
+    # If shop has only one branch, redirect to branch detail
+    if branches.count() == 1:
+        return redirect('branch_detail', branch_id=branches.first().id)
+
+    # Get all services across all branches
+    all_services = Service.objects.filter(branch__shop=shop).select_related('branch')
+
+    context = {
+        'shop': shop,
+        'branches': branches,
+        'all_services': all_services,
+    }
+
+    return render(request, 'shop_detail.html', context)
+
+
+@login_required
+def branch_detail(request, branch_id):
+    """Renders a single branch's detail page."""
+    branch = get_object_or_404(Branch, id=branch_id, shop__is_approved=True)
+
+    # Get all services for this branch
+    services = Service.objects.filter(branch=branch)
+
+    context = {
+        'branch': branch,
+        'shop': branch.shop,
+        'services': services,
+    }
+
+    return render(request, 'branch_detail.html', context)
 
 
 # --- ADMIN DASHBOARD VIEWS ---

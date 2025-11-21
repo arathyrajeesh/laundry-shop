@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from .forms import ProfileForm,BranchForm,ServiceForm
 # NOTE: Assuming you have Profile, Order, and LaundryShop models
 from .models import Profile, Order, LaundryShop ,Service,Branch
@@ -110,15 +112,15 @@ def signup(request):
         welcome_message = f"""
 Hi {username},
 
-Welcome to Bright & Shine! 🎉
+Welcome to Bright & Shine! 
 
 Your account has been created successfully.
 
-Enjoy our laundry services anytime — fast & clean! 🧺✨
+Enjoy our laundry services anytime — fast & clean! 
 """
 
         send_mail(
-            subject="🎉 Welcome to Bright & Shine",
+            subject="Welcome to Bright & Shine",
             message=welcome_message,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
@@ -243,6 +245,53 @@ def profile_detail(request):
 def settings_view(request):
     """Renders the Settings page."""
     return render(request, 'setting.html')
+
+@login_required
+def change_password(request):
+    """Handle password change for users."""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+
+            # Send email notification
+            password_change_message = f"""
+Hi {user.username},
+
+Your password has been successfully changed on Shine & Bright.
+
+If you did not make this change, please contact our support team immediately.
+
+For security reasons, we recommend:
+- Using a strong, unique password
+- Enabling two-factor authentication if available
+- Regularly monitoring your account activity
+
+Thank you for using our services!
+
+Best regards,
+Shine & Bright Team
+
+"""
+
+            send_mail(
+                subject=" Password Changed - Shine & Bright",
+                message=password_change_message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, 'Your password was successfully updated! A confirmation email has been sent.')
+            return redirect('settings')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'change_password.html', {
+        'form': form
+    })
 
 @login_required
 def help_view(request):

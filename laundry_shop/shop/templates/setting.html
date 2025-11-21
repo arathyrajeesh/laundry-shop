@@ -19,13 +19,28 @@
 </head>
 <body>
     <div class="page-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div style="
+                    background: {% if message.tags == 'error' %}#ffdddd{% else %}#ddffdd{% endif %};
+                    padding: 12px;
+                    border-left: 5px solid {% if message.tags == 'error' %}#e63946{% else %}#2d6a4f{% endif %};
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                    color: #333;
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <h1 class="page-header">User Settings ⚙️</h1>
 
         <div class="setting-group">
             <h3>Account Preferences</h3>
             <div class="setting-item">
                 <span>Change Password</span>
-                <a href="#" style="color: #0f334bff; text-decoration: none;">Edit</a>
+                <a href="{% url 'change_password' %}" style="color: #0f334bff; text-decoration: none;">Edit</a>
             </div>
             <div class="setting-item">
                 <span>Email Notifications</span>

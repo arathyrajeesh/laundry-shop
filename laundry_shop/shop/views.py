@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.utils.translation import activate, get_language
 from .forms import ProfileForm,BranchForm,ServiceForm
 # NOTE: Assuming you have Profile, Order, and LaundryShop models
 from .models import Profile, Order, LaundryShop ,Service,Branch
@@ -294,14 +295,68 @@ Shine & Bright Team
     })
 
 @login_required
+def privacy_policy(request):
+    """Display the privacy policy page."""
+    return render(request, 'privacy_policy.html')
+
+@login_required
+def delete_account(request):
+    """Handle account deletion for users."""
+    if request.method == 'POST':
+        # Get user and related data
+        user = request.user
+        user_email = user.email
+        username = user.username
+
+        # Send confirmation email before deletion
+        deletion_message = f"""
+Hi {username},
+
+Your Shine & Bright account has been successfully deleted.
+
+We're sorry to see you go! If you change your mind, you can always create a new account.
+
+For your security, we've permanently removed:
+- Your account information
+- Order history
+- Profile data
+- All associated personal information
+
+If this deletion was not requested by you, please contact our support team immediately.
+
+Best regards,
+Shine & Bright Team
+🧺✨
+"""
+
+        try:
+            send_mail(
+                subject="👋 Account Deleted - Shine & Bright",
+                message=deletion_message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user_email],
+                fail_silently=False,
+            )
+        except:
+            # Continue with deletion even if email fails
+            pass
+
+        # Delete the user account (this will cascade delete related Profile due to CASCADE)
+        user.delete()
+
+        # Log out the user
+        logout(request)
+
+        messages.success(request, 'Your account has been successfully deleted. We\'re sorry to see you go!')
+        return redirect('home')
+
+    return render(request, 'delete_account.html')
+
+@login_required
 def help_view(request):
     """Renders the Help page."""
     return render(request, 'help.html')
 
-@login_required
-def language_settings(request):
-    """Renders the Language Settings page."""
-    return render(request, 'language_settings.html')
 
 @login_required
 def my_orders(request):

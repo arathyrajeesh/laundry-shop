@@ -34,6 +34,12 @@
             {% endfor %}
         {% endif %}
 
+        <div style="margin-bottom: 20px;">
+            <a href="{% url 'dashboard' %}" style="color: #0f334bff; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center;">
+                ← Back to Dashboard
+            </a>
+        </div>
+
         <h1 class="page-header">User Settings ⚙️</h1>
 
         <div class="setting-group">
@@ -52,11 +58,11 @@
             <h3>Privacy</h3>
             <div class="setting-item">
                 <span>View Data Policy</span>
-                <a href="#" style="color: #0f334bff; text-decoration: none;">View</a>
+                <a href="{% url 'privacy_policy' %}" style="color: #0f334bff; text-decoration: none;">Edit</a>
             </div>
             <div class="setting-item">
                 <span>Delete Account</span>
-                <button style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+                <a href="{% url 'delete_account' %}" style="background: #dc3545; color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; display: inline-block;">Delete</a>
             </div>
         </div>
     </div>

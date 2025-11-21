@@ -322,13 +322,12 @@
                     <h4>{{ request.user.username }}</h4>
                     <p>Customer Account</p>
                 </div>
-                <a href="{% url 'profile' %}" class="view-profile-btn">View Profile</a>
+                <a href="{% url 'edit_profile' %}" class="view-profile-btn">Edit Profile</a>
             </div>
 
             <div class="dropdown-section-title">Account</div>
             <div class="dropdown-item"><a href="{% url 'settings' %}">Settings & Privacy</a></div>
             <div class="dropdown-item"><a href="{% url 'help' %}">Help</a></div>
-            <div class="dropdown-item"><a href="{% url 'language' %}">Language</a></div>
 
             <div class="dropdown-section-title">Manage</div>
             <div class="dropdown-item"><a href="{% url 'orders' %}">My Orders</a></div>
@@ -341,8 +340,8 @@
 
     <div class="section-container">
                 <!-- Search Bar Section -->
-        <div class="mb-10">
-            <h2 class="section-heading">🔍 Search Laundry Services</h2>
+                <div class="mb-10">
+                    <h2 class="section-heading">🔍 Search for laundry services</h2>
             <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 3px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
                 <form method="GET" class="search-form">
                     <input type="text" name="search" value="{{ search_query }}" class="search-input"

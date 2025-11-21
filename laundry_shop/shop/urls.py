@@ -21,8 +21,9 @@ urlpatterns = [
     # DROPDOWN PAGES
     path("settings/", views.settings_view, name="settings"),
     path("settings/change-password/", views.change_password, name="change_password"),
+    path("settings/privacy-policy/", views.privacy_policy, name="privacy_policy"),
+    path("settings/delete-account/", views.delete_account, name="delete_account"),
     path("help/", views.help_view, name="help"),
-    path("language/", views.language_settings, name="language"),
     path("orders/", views.my_orders, name="orders"),
     path("billing/", views.billing_payments, name="billing"),
 

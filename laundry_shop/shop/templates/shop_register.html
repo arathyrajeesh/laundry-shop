@@ -177,6 +177,21 @@
         </div>
 
         <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" placeholder="Enter your city">
+        </div>
+
+        <div class="form-group">
+            <button type="button" id="detectLocationBtn" style="width: 100%; padding: 12px; background: #17a2b8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px;">
+                📍 Detect My Location
+            </button>
+            <div id="locationStatus" style="font-size: 14px; color: #666; margin-bottom: 10px;"></div>
+        </div>
+
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
+
+        <div class="form-group">
             <label for="password1">Password *</label>
             <input type="password" id="password1" name="password1" placeholder="Enter password (min 6 characters)" required>
         </div>
@@ -193,6 +208,77 @@
         Already have an account? <a href="{% url 'shop_login' %}">Login here</a>
     </div>
 </div>
+
+<script>
+    document.getElementById("detectLocationBtn").addEventListener("click", function() {
+        const btn = this;
+        const statusDiv = document.getElementById("locationStatus");
+
+        btn.disabled = true;
+        btn.innerHTML = "🔄 Detecting...";
+        statusDiv.innerHTML = "Getting your location...";
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    document.getElementById("latitude").value = lat;
+                    document.getElementById("longitude").value = lon;
+
+                    statusDiv.innerHTML = "✅ Location detected! Getting city information...";
+
+                    // Get city from coordinates
+                    getCityFromLocation(lat, lon);
+                },
+                function(error) {
+                    statusDiv.innerHTML = "❌ Location access denied. Please enter your city manually.";
+                    btn.disabled = false;
+                    btn.innerHTML = "📍 Detect My Location";
+                }
+            );
+        } else {
+            statusDiv.innerHTML = "❌ Geolocation not supported by your browser.";
+            btn.disabled = false;
+            btn.innerHTML = "📍 Detect My Location";
+        }
+    });
+
+    function getCityFromLocation(lat, lon) {
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.address) {
+                    const city = data.address.city ||
+                        data.address.town ||
+                        data.address.village ||
+                        data.address.state ||
+                        data.address.country ||
+                        "";
+
+                    if (city) {
+                        document.getElementById("city").value = city;
+                        document.getElementById("locationStatus").innerHTML = `✅ Location detected: ${city}`;
+                    } else {
+                        document.getElementById("locationStatus").innerHTML = "✅ Location detected! Please enter your city manually.";
+                    }
+                } else {
+                    document.getElementById("locationStatus").innerHTML = "✅ Location detected! Please enter your city manually.";
+                }
+
+                document.getElementById("detectLocationBtn").disabled = false;
+                document.getElementById("detectLocationBtn").innerHTML = "📍 Detect My Location";
+            })
+            .catch(() => {
+                document.getElementById("locationStatus").innerHTML = "✅ Location detected! Please enter your city manually.";
+                document.getElementById("detectLocationBtn").disabled = false;
+                document.getElementById("detectLocationBtn").innerHTML = "📍 Detect My Location";
+            });
+    }
+</script>
 
 </body>
 </html>

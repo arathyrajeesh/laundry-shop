@@ -78,6 +78,7 @@ def signup(request):
 
         latitude = request.POST.get("latitude")
         longitude = request.POST.get("longitude")
+        city = request.POST.get("city")
 
         # Password check
         if password1 != password2:
@@ -102,6 +103,7 @@ def signup(request):
         profile, created = Profile.objects.get_or_create(user=user)
         profile.latitude = latitude
         profile.longitude = longitude
+        profile.city = city
         profile.save()
 
         # Send Welcome Email
@@ -148,6 +150,7 @@ def edit_profile(request):
 
             profile.latitude = request.POST.get("latitude")
             profile.longitude = request.POST.get("longitude")
+            profile.city = request.POST.get("city")
 
             profile.save()
             messages.success(request, "Profile updated successfully!")
@@ -174,12 +177,59 @@ def user_dashboard(request):
     # Data needed for the new dashboard template (shops and cloth status table)
     cloth_status = get_cloth_status(request.user)
 
+    # Handle search functionality
+    search_query = request.GET.get('search', '')
+    services_nearby = []
+    shops_nearby = []
+    user_city = None
+
+    # Check if user has city data
+    try:
+        user_profile = request.user.profile
+        user_city = user_profile.city if user_profile.city else None
+    except:
+        user_city = None
+
+    if search_query:
+        # Search for services by name and get nearby branches
+        services = Service.objects.filter(
+            Q(name__icontains=search_query)
+        ).select_related('branch__shop').filter(branch__shop__is_approved=True)
+
+        # If user has city, prioritize services from same city
+        if user_city:
+            city_services = services.filter(branch__shop__city__iexact=user_city)[:10]
+            if city_services:
+                services_nearby = city_services
+            else:
+                # If no services in user's city, show all matching services
+                services_nearby = services[:10]
+        else:
+            services_nearby = services[:10]  # Limit to 10 results
+    elif user_city:
+        # Show services and shops from user's city only if user has city set
+        services_nearby = Service.objects.filter(
+            branch__shop__is_approved=True,
+            branch__shop__city__iexact=user_city
+        ).select_related('branch__shop')[:10]
+
+        # Also get shops in user's city
+        shops_nearby = LaundryShop.objects.filter(
+            is_approved=True,
+            city__iexact=user_city
+        )[:10]
+    # If no search query and no city, services_nearby and shops_nearby remain empty
+
     return render(request, "user_dashboard.html", {
         "pending_count": pending,
         "completed_count": completed,
         "total_spent": spent,
         "shops": DUMMY_SHOPS,         # Added for the 'Current Available Laundry Shops' section
         "cloth_status": cloth_status, # Added for the 'Your Cloth Status' table
+        "services_nearby": services_nearby,
+        "shops_nearby": shops_nearby,
+        "search_query": search_query,
+        "user_city": user_city,
     })
 
 # --- NEW DROPDOWN VIEWS ---
@@ -422,6 +472,9 @@ def shop_register(request):
         password2 = request.POST.get("password2")
         address = request.POST.get("address", "")
         phone = request.POST.get("phone", "")
+        latitude = request.POST.get("latitude", "")
+        longitude = request.POST.get("longitude", "")
+        city = request.POST.get("city", "")
 
         # Validation
         if not shop_name or not email or not password1 or not password2:
@@ -450,6 +503,9 @@ def shop_register(request):
             email=email,
             address=address,
             phone=phone,
+            city=city,
+            latitude=latitude,
+            longitude=longitude,
             is_approved=False
         )
         shop.set_password(password1)

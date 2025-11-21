@@ -5,13 +5,14 @@ from django.utils import timezone
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+
     full_name = models.CharField(max_length=255, default="User")
     phone = models.CharField(max_length=20, blank=True, null=True)
     profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
 
     latitude = models.CharField(max_length=100, blank=True, null=True)
     longitude = models.CharField(max_length=100, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.user.username
@@ -23,6 +24,9 @@ class LaundryShop(models.Model):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
     address = models.TextField()
+    city = models.CharField(max_length=100, blank=True, null=True)
+    latitude = models.CharField(max_length=100, blank=True, null=True)
+    longitude = models.CharField(max_length=100, blank=True, null=True)
     is_open = models.BooleanField(default=True)
     is_approved = models.BooleanField(default=False)
     phone = models.CharField(max_length=15)

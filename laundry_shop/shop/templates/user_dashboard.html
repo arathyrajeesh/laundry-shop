@@ -249,6 +249,59 @@
             margin-top: 15px;
         }
 
+        /* Search Bar Styles */
+        .search-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .search-btn {
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #0b2737;
+        }
+
+        .search-results {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .clear-search {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .clear-search:hover {
+            text-decoration: underline;
+        }
+
     </style>
 </head>
 <body>
@@ -287,27 +340,99 @@
     </div>
 
     <div class="section-container">
-        <h1 class="welcome-header">
-            👋 Welcome, {{ request.user.username }}
-        </h1>
-        <p class="sub-text">
-            Here are your laundry options and cloth status.
-        </p>
-
+                <!-- Search Bar Section -->
         <div class="mb-10">
-            <h2 class="section-heading">🏪 Current Available Laundry Shops</h2>
-            <div class="shop-grid">
-                {% for shop in shops %}
-                    <div class="card">
-                        <h3>{{ shop.name }}</h3>
-                        <p class="text-gray-600 text-sm mt-1">{{ shop.address }}</p>
-                        <span class="status">Open Now</span>
-                        <a href="{% url 'shop_detail' shop.id %}" class="btn">View Shop</a>
+            <h2 class="section-heading">🔍 Search Laundry Services</h2>
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 3px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <form method="GET" class="search-form">
+                    <input type="text" name="search" value="{{ search_query }}" class="search-input"
+                            placeholder="Search for laundry services (e.g., wash & fold, dry cleaning)...">
+                    <button type="submit" class="search-btn">
+                        🔍 Search
+                    </button>
+                </form>
+                {% if search_query %}
+                    <div class="search-results">
+                        Showing results for: <strong>"{{ search_query }}"</strong>
+                        <a href="{% url 'dashboard' %}" class="clear-search">Clear search</a>
                     </div>
-                {% empty %}
-                    <p class="empty-message">No shops available right now.</p>
-                {% endfor %}
+                {% endif %}
             </div>
+        </div>
+
+        <!-- Services Near You -->
+        <div class="mb-10">
+            <h2 class="section-heading">🧺 Services Near You</h2>
+            {% if services_nearby %}
+                <div class="shop-grid">
+                    {% for service in services_nearby %}
+                        <div class="card">
+                            <h3>{{ service.name }}</h3>
+                            <p class="text-gray-600 text-sm mt-1">
+                                <strong>Branch:</strong> {{ service.branch.name }}<br>
+                                <strong>Shop:</strong> {{ service.branch.shop.name }}<br>
+                                <strong>Address:</strong> {{ service.branch.address|truncatechars:40 }}
+                            </p>
+                            {% if service.price %}
+                                <span class="status" style="background: #28a745;">₹{{ service.price }}</span>
+                            {% else %}
+                                <span class="status" style="background: #17a2b8;">Price on Request</span>
+                            {% endif %}
+                            <a href="{% url 'shop_detail' service.branch.shop.id %}" class="btn">View Shop</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 3px 15px rgba(0,0,0,0.1); text-align: center;">
+                    {% if search_query %}
+                        <p class="empty-message">
+                            No services found matching "{{ search_query }}". Try a different search term.
+                        </p>
+                    {% elif not user_city %}
+                        <p class="empty-message">
+                            📍 <strong>City Required</strong><br>
+                            To find services near you, please update your city in your profile settings.
+                        </p>
+                        <a href="{% url 'edit_profile' %}" class="btn" style="margin-top: 15px;">Update City</a>
+                    {% else %}
+                        <p class="empty-message">
+                            No services available in {{ user_city }} right now.
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Shops Near You -->
+        <div class="mb-10">
+            <h2 class="section-heading">🏪 Laundry Shops Near You</h2>
+            {% if shops_nearby %}
+                <div class="shop-grid">
+                    {% for shop in shops_nearby %}
+                        <div class="card">
+                            <h3>{{ shop.name }}</h3>
+                            <p class="text-gray-600 text-sm mt-1">{{ shop.address }}</p>
+                            <p class="text-gray-600 text-sm mt-1">📍 {{ shop.city }}</p>
+                            <span class="status">Open Now</span>
+                            <a href="{% url 'shop_detail' shop.id %}" class="btn">View Shop</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 3px 15px rgba(0,0,0,0.1); text-align: center;">
+                    {% if not user_city %}
+                        <p class="empty-message">
+                            📍 <strong>City Required</strong><br>
+                            To find shops near you, please update your city in your profile settings.
+                        </p>
+                        <a href="{% url 'edit_profile' %}" class="btn" style="margin-top: 15px;">Update City</a>
+                    {% else %}
+                        <p class="empty-message">
+                            No shops available in {{ user_city }} right now.
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
 
         <div>

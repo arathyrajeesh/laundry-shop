@@ -116,6 +116,7 @@
 
         <input type="hidden" name="latitude" id="latitude">
         <input type="hidden" name="longitude" id="longitude">
+        <input type="hidden" name="city" id="city">
 
         <button type="submit">Signup</button>
     </form>
@@ -142,9 +143,13 @@ window.onload = function () {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function (position) {
-                document.getElementById("latitude").value = position.coords.latitude;
-                document.getElementById("longitude").value = position.coords.longitude;
-                console.log("Location captured:", position.coords.latitude, position.coords.longitude);
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                document.getElementById("latitude").value = lat;
+                document.getElementById("longitude").value = lon;
+                console.log("Location captured:", lat, lon);
+                // Get city from coordinates
+                getCityFromLocation(lat, lon);
             },
             function (error) {
                 console.log("Location permission denied or failed.");
@@ -155,6 +160,28 @@ window.onload = function () {
         alert("Geolocation not supported by your device.");
     }
 };
+
+function getCityFromLocation(lat, lon) {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.address) {
+                const city = data.address.city ||
+                    data.address.town ||
+                    data.address.village ||
+                    data.address.state ||
+                    data.address.country ||
+                    "";
+                // Set city value
+                document.getElementById("city").value = city;
+            }
+        })
+        .catch(() => {
+            console.log("Unable to fetch city from location");
+        });
+}
 </script>
 
 </html>

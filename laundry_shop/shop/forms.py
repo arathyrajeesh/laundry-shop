@@ -4,7 +4,7 @@ from .models import Profile,Service,Branch
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['full_name', 'phone', 'profile_image']
+        fields = ['full_name', 'phone', 'profile_image', 'city']
 
 
 class ServiceForm(forms.ModelForm):

@@ -39,6 +39,9 @@
         {{ form.profile_image.label }}
         {{ form.profile_image }}
 
+        {{ form.city.label }}
+        {{ form.city }}
+
         <label>Latitude:</label>
         <input type="text" id="latitude" name="latitude" value="{{ profile.latitude }}" readonly>
 
@@ -84,13 +87,20 @@ function getPlaceName(lat, lon) {
         .then(response => response.json())
         .then(data => {
             if (data.address) {
-                document.getElementById("place_result").innerText =
-                    data.address.city ||
+                const city = data.address.city ||
                     data.address.town ||
                     data.address.village ||
                     data.address.state ||
                     data.address.country ||
                     "Unknown place";
+
+                document.getElementById("place_result").innerText = city;
+
+                // Auto-populate city field
+                const cityField = document.getElementById("id_city");
+                if (cityField && !cityField.value) {
+                    cityField.value = city;
+                }
             }
         })
         .catch(() => {

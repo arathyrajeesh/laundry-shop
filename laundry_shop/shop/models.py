@@ -24,6 +24,7 @@ class LaundryShop(models.Model):
     password = models.CharField(max_length=128)
     address = models.TextField()
     is_open = models.BooleanField(default=True)
+    is_approved = models.BooleanField(default=False)
     phone = models.CharField(max_length=15)
     image = models.ImageField(upload_to="shops/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,3 +56,31 @@ class Order(models.Model):
     cloth_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Service(models.Model):
+    branch = models.ForeignKey('Branch', on_delete=models.CASCADE, related_name='services')
+    name = models.CharField(max_length=120)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # optional
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('branch', 'name')
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.branch.name})"
+
+
+class Branch(models.Model):
+    shop = models.ForeignKey(LaundryShop, on_delete=models.CASCADE, related_name='branches')
+    name = models.CharField(max_length=150)
+    address = models.TextField()
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('shop', 'name')
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} — {self.shop.name}"

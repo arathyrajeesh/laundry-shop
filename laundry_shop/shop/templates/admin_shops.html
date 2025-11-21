@@ -107,6 +107,10 @@
             font-size: 14px;
         }
 
+        .approval-status {
+            margin-top: 10px;
+        }
+
         .shop-card .status {
             display: inline-block;
             padding: 5px 12px;
@@ -124,6 +128,16 @@
         .status-closed {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending-approval {
+            background: #fff3cd;
+            color: #856404;
         }
 
         .data-table {
@@ -195,8 +209,25 @@
                         <i class="fas fa-door-closed"></i> Closed
                         {% endif %}
                     </span>
+                    <div class="approval-status">
+                        <span class="status {% if shop.is_approved %}status-approved{% else %}status-pending-approval{% endif %}">
+                            {% if shop.is_approved %}
+                            <i class="fas fa-check"></i> Approved
+                            {% else %}
+                            <i class="fas fa-clock"></i> Pending Approval
+                            {% endif %}
+                        </span>
+                    </div>
                     <div style="margin-top: 15px;">
-                        <a href="/admin/shop/laundryshop/{{ shop.id }}/change/" class="btn btn-primary" style="font-size: 12px; padding: 8px 15px;">
+                        {% if not shop.is_approved %}
+                        <button onclick="approveShop({{ shop.id }})" class="btn btn-primary" style="font-size: 12px; padding: 8px 15px; margin-right: 5px;">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button onclick="rejectShop({{ shop.id }})" class="btn btn-secondary" style="font-size: 12px; padding: 8px 15px;">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                        {% endif %}
+                        <a href="/admin/shop/laundryshop/{{ shop.id }}/change/" class="btn btn-primary" style="font-size: 12px; padding: 8px 15px; margin-left: 5px;">
                             <i class="fas fa-edit"></i> Edit
                         </a>
                     </div>
@@ -213,6 +244,7 @@
                         <th>Address</th>
                         <th>Phone</th>
                         <th>Status</th>
+                        <th>Approval</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -229,7 +261,20 @@
                             </span>
                         </td>
                         <td>
-                            <a href="/admin/shop/laundryshop/{{ shop.id }}/change/" class="btn btn-primary" style="font-size: 12px; padding: 5px 15px;">
+                            <span class="status {% if shop.is_approved %}status-approved{% else %}status-pending-approval{% endif %}">
+                                {% if shop.is_approved %}Approved{% else %}Pending{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if not shop.is_approved %}
+                            <button onclick="approveShop({{ shop.id }})" class="btn btn-primary" style="font-size: 12px; padding: 5px 10px; margin-right: 5px;">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button onclick="rejectShop({{ shop.id }})" class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px;">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                            {% endif %}
+                            <a href="/admin/shop/laundryshop/{{ shop.id }}/change/" class="btn btn-primary" style="font-size: 12px; padding: 5px 15px; margin-left: 5px;">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
                         </td>
@@ -248,6 +293,74 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+        function approveShop(shopId) {
+            if (confirm('Are you sure you want to approve this shop?')) {
+                fetch(`/admin-panel/shop/${shopId}/approve/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Shop approved successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while approving the shop.');
+                });
+            }
+        }
+
+        function rejectShop(shopId) {
+            if (confirm('Are you sure you want to reject this shop?')) {
+                fetch(`/admin-panel/shop/${shopId}/reject/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Shop rejected successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while rejecting the shop.');
+                });
+            }
+        }
+
+        // Get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
 </body>
 </html>
 

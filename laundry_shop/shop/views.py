@@ -2,18 +2,19 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .forms import ProfileForm
+from .forms import ProfileForm,BranchForm,ServiceForm
 # NOTE: Assuming you have Profile, Order, and LaundryShop models
-from .models import Profile, Order, LaundryShop 
+from .models import Profile, Order, LaundryShop ,Service,Branch
 from django.contrib.auth import authenticate, login, logout
-from django.db.models import Sum      
+from django.db.models import Sum
+from django.db import IntegrityError
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, JsonResponse # Added for placeholder views
 from django.db.models import Count, Q
-from datetime import datetime, timedelta
-
+from datetime import datetime
+from django.views.decorators.http import require_POST
 # --- DUMMY DATA (FOR VIEWS) ---
 DUMMY_SHOPS = [
     {'id': 1, 'name': 'QuickClean Laundry', 'address': '123 Main St, Kannur'},
@@ -257,6 +258,7 @@ def admin_dashboard(request):
     # Shops
     total_shops = LaundryShop.objects.count()
     open_shops = LaundryShop.objects.filter(is_open=True).count()
+    pending_approvals = LaundryShop.objects.filter(is_approved=False).count()
     
     # Recent orders (last 10)
     recent_orders = Order.objects.select_related('user', 'shop').order_by('-created_at')[:10]
@@ -266,7 +268,14 @@ def admin_dashboard(request):
     
     # Recent users (last 5)
     recent_users = User.objects.order_by('-date_joined')[:5]
-    
+
+    # Branches
+    total_branches = Branch.objects.count()
+    recent_branches = Branch.objects.select_related('shop').order_by('-created_at')[:10]
+
+    # Shops with their branches
+    shops_with_branches = LaundryShop.objects.prefetch_related('branches').all()
+
     context = {
         # Statistics
         'total_orders': total_orders,
@@ -280,12 +289,16 @@ def admin_dashboard(request):
         'new_users_today': new_users_today,
         'total_shops': total_shops,
         'open_shops': open_shops,
-        
+        'pending_approvals': pending_approvals,
+        'total_branches': total_branches,
+
         # Data
         'recent_orders': recent_orders,
         'orders_by_status': orders_by_status,
         'recent_users': recent_users,
+        'recent_branches': recent_branches,
         'all_shops': LaundryShop.objects.all(),
+        'shops_with_branches': shops_with_branches,
     }
     
     return render(request, 'admin_dashboard.html', context)
@@ -367,12 +380,35 @@ def admin_users(request):
 def admin_shops(request):
     """View and manage shops."""
     shops = LaundryShop.objects.all().order_by('name')
-    
+
     context = {
         'shops': shops,
     }
-    
+
     return render(request, 'admin_shops.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_user, login_url='login')
+def admin_approve_shop(request, shop_id):
+    """Approve a shop."""
+    if request.method == 'POST':
+        shop = get_object_or_404(LaundryShop, id=shop_id)
+        shop.is_approved = True
+        shop.save()
+        return JsonResponse({'success': True, 'message': 'Shop approved successfully'})
+    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+
+
+@login_required
+@user_passes_test(is_staff_user, login_url='login')
+def admin_reject_shop(request, shop_id):
+    """Reject a shop."""
+    if request.method == 'POST':
+        shop = get_object_or_404(LaundryShop, id=shop_id)
+        shop.delete()  # Or set is_approved=False and is_open=False
+        return JsonResponse({'success': True, 'message': 'Shop rejected and removed'})
+    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
 
 # --- SHOP AUTHENTICATION VIEWS ---
@@ -413,7 +449,8 @@ def shop_register(request):
             name=shop_name,
             email=email,
             address=address,
-            phone=phone
+            phone=phone,
+            is_approved=False
         )
         shop.set_password(password1)
         shop.save()
@@ -437,6 +474,9 @@ def shop_login(request):
         try:
             shop = LaundryShop.objects.get(name=shop_name)
             if shop.check_password(password):
+                if not shop.is_approved:
+                    messages.error(request, "Your shop is pending approval. Please wait for admin approval.")
+                    return redirect("shop_login")
                 # Store shop ID in session
                 request.session['shop_id'] = shop.id
                 request.session['shop_name'] = shop.name
@@ -506,7 +546,10 @@ def shop_dashboard(request):
     
     # Recent orders
     recent_orders = shop_orders.select_related('user')[:10]
-    
+
+    # Branches
+    branches = Branch.objects.filter(shop=shop).prefetch_related('services')
+
     context = {
         'shop': shop,
         'total_orders': total_orders,
@@ -519,6 +562,7 @@ def shop_dashboard(request):
         'total_revenue': total_revenue,
         'today_revenue': today_revenue,
         'recent_orders': recent_orders,
+        'branches': branches,
     }
     
     return render(request, 'shop_dashboard.html', context)
@@ -546,3 +590,94 @@ def shop_update_order_status(request, order_id):
             return JsonResponse({'success': False, 'message': 'Invalid status'}, status=400)
     
     return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+
+
+
+# ---------- Branch Views ----------
+@shop_login_required
+def add_branch(request):
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+
+    if request.method == 'POST':
+        form = BranchForm(request.POST)
+        if form.is_valid():
+            branch = form.save(commit=False)
+            branch.shop = shop
+            branch.save()
+            messages.success(request, 'Branch created successfully.')
+            return redirect('shop_dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BranchForm()
+
+    return render(request, 'add_branch.html', {'form': form, 'shop': shop})
+
+
+@shop_login_required
+def edit_branch(request, branch_id):
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+    branch = get_object_or_404(Branch, id=branch_id, shop=shop)
+
+    if request.method == 'POST':
+        form = BranchForm(request.POST, instance=branch)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Branch updated.')
+            return redirect('shop_dashboard')
+        else:
+            messages.error(request, 'Please fix the errors below.')
+    else:
+        form = BranchForm(instance=branch)
+
+    return render(request, 'edit_branch.html', {'form': form, 'shop': shop, 'branch': branch})
+
+
+@shop_login_required
+@require_POST
+def delete_branch(request, branch_id):
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+    branch = get_object_or_404(Branch, id=branch_id, shop=shop)
+    branch.delete()
+    messages.success(request, 'Branch deleted.')
+    return redirect('shop_dashboard')
+
+
+# ---------- Service Views ----------
+@shop_login_required
+def add_service(request, branch_id):
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+    branch = get_object_or_404(Branch, id=branch_id, shop=shop)
+
+    if request.method == 'POST':
+        form = ServiceForm(request.POST)
+        if form.is_valid():
+            service = form.save(commit=False)
+            service.branch = branch
+            try:
+                service.save()
+                messages.success(request, 'Service added successfully.')
+                return redirect('shop_dashboard')
+            except IntegrityError:
+                messages.error(request, 'This service already exists for this branch.')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ServiceForm()
+
+    return render(request, 'add_service.html', {'form': form, 'shop': shop, 'branch': branch})
+
+
+@shop_login_required
+@require_POST
+def delete_service(request, service_id):
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+    service = get_object_or_404(Service, id=service_id, branch__shop=shop)
+    service.delete()
+    messages.success(request, 'Service deleted.')
+    return redirect('shop_dashboard')

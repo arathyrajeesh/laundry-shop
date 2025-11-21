@@ -422,6 +422,18 @@
                     </div>
                 </div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-value">{{ pending_approvals }}</div>
+                        <div class="stat-card-label">Pending Approvals</div>
+                    </div>
+                    <div class="stat-card-icon icon-orange">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Quick Actions -->
@@ -578,24 +590,152 @@
             </div>
             {% endif %}
         </div>
+
+        <!-- Recent Branches -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2><i class="fas fa-map-marker-alt"></i> Recent Branches</h2>
+            </div>
+            {% if recent_branches %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Branch Name</th>
+                        <th>Shop</th>
+                        <th>Address</th>
+                        <th>Phone</th>
+                        <th>Services</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for branch in recent_branches %}
+                    <tr>
+                        <td>{{ branch.name }}</td>
+                        <td>{{ branch.shop.name }}</td>
+                        <td>{{ branch.address|truncatechars:30 }}</td>
+                        <td>{{ branch.phone|default:"N/A" }}</td>
+                        <td>
+                            {% if branch.services.all %}
+                                {{ branch.services.count }} service{{ branch.services.count|pluralize }}
+                            {% else %}
+                                <span class="status-badge status-pending">No Services</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ branch.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>No branches yet</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Shops and Their Branches -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2><i class="fas fa-store"></i> Shops and Branches</h2>
+            </div>
+            {% if shops_with_branches %}
+                {% for shop in shops_with_branches %}
+                <div class="shop-section" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 15px; font-size: 20px;">
+                        <i class="fas fa-store"></i> {{ shop.name }}
+                        {% if shop.is_approved %}
+                            <span class="status-badge status-completed">Approved</span>
+                        {% else %}
+                            <span class="status-badge status-pending">Pending Approval</span>
+                        {% endif %}
+                        {% if shop.is_open %}
+                            <span class="status-badge status-completed">Open</span>
+                        {% else %}
+                            <span class="status-badge status-pending">Closed</span>
+                        {% endif %}
+                        {% if not shop.is_approved %}
+                            <div style="display: inline-block; margin-left: 10px;">
+                                <button onclick="approveShop({{ shop.id }})" class="btn btn-primary" style="font-size: 12px; padding: 5px 10px; margin-right: 5px;">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button onclick="rejectShop({{ shop.id }})" class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px;">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </div>
+                        {% endif %}
+                    </h3>
+                    <p style="color: #666; margin-bottom: 15px;"><i class="fas fa-map-marker-alt"></i> {{ shop.address }}</p>
+                    {% if shop.is_approved %}
+                        {% if shop.branches.all %}
+                            <table class="data-table" style="margin-top: 15px;">
+                                <thead>
+                                    <tr>
+                                        <th>Branch Name</th>
+                                        <th>Address</th>
+                                        <th>Phone</th>
+                                        <th>Services</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for branch in shop.branches.all %}
+                                    <tr>
+                                        <td>{{ branch.name }}</td>
+                                        <td>{{ branch.address|truncatechars:40 }}</td>
+                                        <td>{{ branch.phone|default:"N/A" }}</td>
+                                        <td>
+                                            {% if branch.services.all %}
+                                                {{ branch.services.count }} service{{ branch.services.count|pluralize }}
+                                            {% else %}
+                                                <span class="status-badge status-pending">No Services</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ branch.created_at|date:"M d, Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="empty-state" style="padding: 20px; text-align: center;">
+                                <i class="fas fa-info-circle"></i>
+                                <p>No branches for this shop yet</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="empty-state" style="padding: 20px; text-align: center;">
+                            <i class="fas fa-clock"></i>
+                            <p>Shop is pending approval. Branches will be shown once approved.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-store"></i>
+                <p>No shops yet</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     <script>
         function updateOrderStatus(orderId) {
             const statusSelect = document.getElementById(`status-${orderId}`);
             const newStatus = statusSelect.value;
-            
+
             // Create form data
             const formData = new FormData();
             formData.append('status', newStatus);
             formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-            
+
             // Send AJAX request
-            fetch(`/admin/order/${orderId}/update-status/`, {
+            fetch(`/admin-panel/order/${orderId}/update-status/`, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
+                    'X-CSRFToken': getCookie('csrftoken')
                 }
             })
             .then(response => response.json())
@@ -611,6 +751,56 @@
                 console.error('Error:', error);
                 alert('An error occurred while updating the order status.');
             });
+        }
+
+        function approveShop(shopId) {
+            if (confirm('Are you sure you want to approve this shop?')) {
+                fetch(`/admin-panel/shop/${shopId}/approve/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Shop approved successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while approving the shop.');
+                });
+            }
+        }
+
+        function rejectShop(shopId) {
+            if (confirm('Are you sure you want to reject this shop?')) {
+                fetch(`/admin-panel/shop/${shopId}/reject/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Shop rejected successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while rejecting the shop.');
+                });
+            }
         }
 
         // Get CSRF token from cookies

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Shine & Bright Laundry</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,13 +47,35 @@
             border: 1px solid #bbb;
             outline: none;
             font-size: 15px;
+            box-sizing: border-box; /* IMPORTANT: Ensures padding doesn't increase total width */
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-container input {
+            width: 100%;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+            padding: 0; /* Remove default button padding */
         }
 
         input:focus {
             border-color: #3498db;
         }
 
-        button {
+        button[type="submit"] { /* Target only the submit button */
             width: 100%;
             padding: 12px;
             background: #3498db;
@@ -62,9 +85,10 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
+            transition: background 0.3s ease;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background: #2d82c4;
         }
 
@@ -75,16 +99,55 @@
         a {
             color: #3498db;
             text-decoration: none;
+            transition: text-decoration 0.3s ease;
         }
 
         a:hover {
             text-decoration: underline;
         }
+        
+        /* Shop Owner Links Styling */
+        .shop-links {
+            margin-top: 20px; 
+            padding-top: 20px; 
+            border-top: 1px solid #eee;
+        }
+        
+        .shop-links-container {
+            display: flex; 
+            gap: 10px; 
+            justify-content: center;
+        }
+
+        .shop-links-container a {
+            padding: 8px 16px; 
+            border-radius: 8px; /* Consistent rounded corners */
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 500;
+            color: white; /* Ensure text is white */
+            transition: opacity 0.3s ease;
+        }
+        
+        .shop-links-container a:hover {
+            opacity: 0.9;
+            text-decoration: none; /* Override default underline hover */
+        }
+
+        .shop-login-btn {
+            background: #28a745; /* Green */
+        }
+
+        .shop-register-btn {
+            background: #17a2b8; /* Cyan */
+        }
+
     </style>
 </head>
 <body>
 
 <div class="login-container">
+    
     {% if messages %}
         {% for message in messages %}
             <div style="
@@ -107,7 +170,13 @@
     <form method="POST">
         {% csrf_token %}
         <input type="text" name="username" placeholder="Enter Username" required>
-        <input type="password" name="password" placeholder="Enter Password" required>
+
+        <div class="password-container">
+            <input type="password" id="password" name="password" placeholder="Enter Password" required>
+            <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
 
         <button type="submit">Login</button>
     </form>
@@ -117,14 +186,36 @@
         <a href="{% url 'signup' %}">Create one</a>
     </p>
 
-    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+    <div class="shop-links">
         <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Are you a shop owner?</p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-            <a href="{% url 'shop_login' %}" style="background: #28a745; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">Shop Login</a>
-            <a href="{% url 'shop_register' %}" style="background: #17a2b8; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">Register Shop</a>
+        <div class="shop-links-container">
+            <a href="{% url 'shop_login' %}" class="shop-login-btn">Shop Login</a>
+            <a href="{% url 'shop_register' %}" class="shop-register-btn">Register Shop</a>
         </div>
     </div>
 </div>
+
+<script>
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+    const icon = toggleBtn.querySelector('i');
+
+    toggleBtn.addEventListener('click', () => {
+        const type = passwordInput.type === "password" ? "text" : "password";
+        passwordInput.type = type;
+
+        // Toggle Font Awesome icon classes
+        if (type === "password") {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            toggleBtn.setAttribute('aria-label', 'Show password');
+        } else {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            toggleBtn.setAttribute('aria-label', 'Hide password');
+        }
+    });
+</script>
 
 </body>
 </html>

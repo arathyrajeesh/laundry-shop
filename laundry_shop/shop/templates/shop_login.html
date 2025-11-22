@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Login - Shine & Bright Laundry</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: "Poppins", Arial, sans-serif;
@@ -78,7 +79,32 @@
             box-shadow: 0 0 0 3px rgba(15, 51, 75, 0.1);
         }
 
-        button {
+        /* --- New Password Container Styling --- */
+        .password-container {
+            position: relative; /* Base for positioning the toggle icon */
+            width: 100%;
+        }
+
+        .password-container input {
+            padding-right: 40px; /* Space for the icon */
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+            padding: 5px;
+            z-index: 10;
+        }
+        /* ------------------------------------- */
+
+        button[type="submit"] {
             width: 100%;
             padding: 14px;
             background: #0f334bff;
@@ -92,7 +118,7 @@
             transition: background 0.3s;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background: #0a2538;
         }
 
@@ -155,12 +181,17 @@
         
         <div class="form-group">
             <label for="shop_name">Shop Name</label>
-            <input type="text" id="shop_name" name="shop_name" placeholder="Enter your shop name" required autofocus>
+            <input type="text" id="shop_name" name="shop_name" placeholder="Enter your shop name" required autofocus autocomplete="username">
         </div>
 
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <div class="password-container">
+                <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Toggle password visibility">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
         </div>
 
         <button type="submit">Login</button>
@@ -175,6 +206,27 @@
     </div>
 </div>
 
+<script>
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const icon = toggleBtn.querySelector('i');
+
+    toggleBtn.addEventListener('click', () => {
+        const type = passwordInput.type === "password" ? "text" : "password";
+        passwordInput.type = type;
+
+        // Toggle Font Awesome icon classes
+        if (type === "password") {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            toggleBtn.setAttribute('aria-label', 'Show password');
+        } else {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            toggleBtn.setAttribute('aria-label', 'Hide password');
+        }
+    });
+</script>
+
 </body>
 </html>
-

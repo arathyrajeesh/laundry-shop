@@ -1029,11 +1029,11 @@
             <div class="footer-col footer-contacts">
                 <h3>Contacts</h3>
                 <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> 8494 Signal Hill Road Manassas, VA, 20110</li>
+                    <li><i class="fas fa-map-marker-alt"></i>Kozhikode,kerala</li>
                     <li><i class="fas fa-clock"></i> Mon–Fri: 8am – 5pm</li>
                     <li><i class="fas fa-clock"></i> Sat–Sun: 10am – 5pm</li>
                     <li><i class="fas fa-envelope"></i> info@yourlaundrysite.com</li>
-                    <li><i class="fas fa-phone-alt"></i> 1 (800) 765-43-21</li>
+                    <li><i class="fas fa-phone-alt"></i> +(91) 8547189033</li>
                 </ul>
             </div>
 
@@ -1147,6 +1147,11 @@
             return 'To login, click on the "Login" link in the navigation menu. If you don\'t have an account, you can register using the "Register" link.';
         } else if (msg.includes('store') || msg.includes('shop') || msg.includes('how many')) {
             return 'We currently have 4 approved laundry stores available in our network. You can find them by logging in and checking the dashboard!';
+        } else if (msg.includes('order') || msg.includes('book now')) {
+            setTimeout(() => {
+                window.location.href = "{% url 'dashboard' %}";
+            }, 1000);
+            return 'Taking you to the order page where you can select services from our shops...';
         } else if (msg.includes('thank') || msg.includes('bye') || msg.includes('nice day')) {
             return 'You\'re welcome! Have a nice day!';
         } else if (msg.includes('hello') || msg.includes('hi')) {

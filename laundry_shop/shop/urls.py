@@ -16,6 +16,10 @@ urlpatterns = [
 
     # SHOPS
     path("shop/<int:shop_id>/", views.shop_detail, name="shop_detail"),
+    path("shop/<int:shop_id>/select-services/", views.select_services, name="select_services"),
+    path("shop/<int:shop_id>/create-order/", views.create_order, name="create_order"),
+    path("payment/success/", views.payment_success, name="payment_success"),
+    path("payment/failed/", views.payment_failed, name="payment_failed"),
     path("branch/<int:branch_id>/", views.branch_detail, name="branch_detail"),
 
     # DROPDOWN PAGES

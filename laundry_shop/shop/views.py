@@ -1,3 +1,4 @@
+import razorpay
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -410,6 +411,167 @@ def branch_detail(request, branch_id):
     }
 
     return render(request, 'branch_detail.html', context)
+
+
+@login_required
+def select_services(request, shop_id):
+    """Renders the service selection page for a shop."""
+    shop = get_object_or_404(LaundryShop, id=shop_id, is_approved=True)
+
+    # Get all services for this shop across all branches
+    services = Service.objects.filter(branch__shop=shop).select_related('branch')
+
+    context = {
+        'shop': shop,
+        'services': services,
+    }
+
+    return render(request, 'select_services.html', context)
+
+
+@login_required
+def create_order(request, shop_id):
+    """Create order and initiate Razorpay payment."""
+    if request.method != 'POST':
+        return redirect('select_services', shop_id=shop_id)
+
+    shop = get_object_or_404(LaundryShop, id=shop_id, is_approved=True)
+    selected_services = request.POST.getlist('selected_services')
+
+    if not selected_services:
+        messages.error(request, 'Please select at least one service.')
+        return redirect('select_services', shop_id=shop_id)
+
+    # Calculate total amount
+    total_amount = 0
+    order_items = []
+
+    for service_id in selected_services:
+        try:
+            service = Service.objects.get(id=service_id, branch__shop=shop)
+            quantity = int(request.POST.get(f'quantity_{service_id}', 1))
+            if quantity < 1:
+                quantity = 1
+
+            if service.price:
+                item_total = service.price * quantity
+                total_amount += item_total
+                order_items.append({
+                    'service': service,
+                    'quantity': quantity,
+                    'price': service.price,
+                    'total': item_total
+                })
+        except (Service.DoesNotExist, ValueError):
+            continue
+
+    if total_amount == 0:
+        messages.error(request, 'Unable to calculate order total. Please try again.')
+        return redirect('select_services', shop_id=shop_id)
+
+    # Create order in database
+    order = Order.objects.create(
+        user=request.user,
+        shop=shop,
+        amount=total_amount,
+        cloth_status='Pending'
+    )
+
+    # Store order items in session for later use
+    request.session['order_items'] = [
+        {
+            'service_id': item['service'].id,
+            'service_name': item['service'].name,
+            'quantity': item['quantity'],
+            'price': float(item['price']),
+            'total': float(item['total'])
+        } for item in order_items
+    ]
+    request.session['order_id'] = order.id
+    request.session['shop_id'] = shop.id
+
+    # Initialize Razorpay client
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+    # Create Razorpay order
+    razorpay_order = client.order.create({
+        'amount': int(total_amount * 100),  # Amount in paisa
+        'currency': 'INR',
+        'payment_capture': '1'  # Auto capture
+    })
+
+    # Store Razorpay order ID in session
+    request.session['razorpay_order_id'] = razorpay_order['id']
+
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'total_amount': total_amount,
+        'razorpay_order_id': razorpay_order['id'],
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'shop': shop,
+    }
+
+    return render(request, 'payment.html', context)
+
+
+@login_required
+def payment_success(request):
+    """Handle successful payment."""
+    razorpay_payment_id = request.POST.get('razorpay_payment_id')
+    razorpay_order_id = request.POST.get('razorpay_order_id')
+    razorpay_signature = request.POST.get('razorpay_signature')
+
+    # Verify payment signature
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+    try:
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        })
+
+        # Payment verified, update order status
+        order_id = request.session.get('order_id')
+        if order_id:
+            order = get_object_or_404(Order, id=order_id, user=request.user)
+            order.cloth_status = 'Washing'  # Move to next status
+            order.save()
+
+            # Clear session
+            request.session.pop('order_items', None)
+            request.session.pop('order_id', None)
+            request.session.pop('shop_id', None)
+            request.session.pop('razorpay_order_id', None)
+
+            messages.success(request, f'Payment successful! Your order #{order.id} has been placed.')
+            return redirect('orders')
+
+    except razorpay.errors.SignatureVerificationError:
+        messages.error(request, 'Payment verification failed. Please contact support.')
+        return redirect('dashboard')
+
+    messages.error(request, 'Payment failed. Please try again.')
+    return redirect('dashboard')
+
+
+@login_required
+def payment_failed(request):
+    """Handle failed payment."""
+    order_id = request.session.get('order_id')
+    if order_id:
+        # Delete the order since payment failed
+        Order.objects.filter(id=order_id, user=request.user).delete()
+
+    # Clear session
+    request.session.pop('order_items', None)
+    request.session.pop('order_id', None)
+    request.session.pop('shop_id', None)
+    request.session.pop('razorpay_order_id', None)
+
+    messages.error(request, 'Payment failed. Please try again.')
+    return redirect('dashboard')
 
 
 # --- ADMIN DASHBOARD VIEWS ---

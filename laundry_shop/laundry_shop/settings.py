@@ -142,3 +142,7 @@ EMAIL_HOST_PASSWORD = 'kzyjkrzlmfwvqgnd'
 # Login URL for redirecting unauthenticated users
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
+
+# Razorpay Configuration
+RAZORPAY_KEY_ID = 'rzp_test_Rij5vlig4waLpC'  # Replace with your actual Razorpay Key ID
+RAZORPAY_KEY_SECRET = 'eL02Z8hmoLl0j88j67n7JJ3e'  # Replace with your actual Razorpay Key Secret

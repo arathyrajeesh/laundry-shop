@@ -139,6 +139,28 @@
             cursor: not-allowed;
         }
 
+        .payment-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-buttons .pay-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .payment-buttons {
+                flex-direction: row;
+                gap: 20px;
+            }
+
+            .payment-buttons .pay-btn {
+                flex: 1;
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -184,15 +206,23 @@
                 <p style="margin-bottom: 20px; color: #666;">
                     Complete your payment securely using Razorpay
                 </p>
-                <button id="pay-btn" class="pay-btn" onclick="startPayment()">
-                    <i class="fas fa-credit-card"></i> Pay ₹{{ total_amount }}
-                </button>
+                <div class="payment-buttons">
+                    <button class="pay-btn" onclick="startPayment('card')">
+                        <i class="fas fa-credit-card"></i> Pay with Card/Net Banking
+                    </button>
+                    <button class="pay-btn" onclick="startPayment('upi')">
+                        <i class="fab fa-google"></i> Pay with Google Pay
+                    </button>
+                    <button class="pay-btn" onclick="startPayment('upi')">
+                        <i class="fas fa-mobile-alt"></i> Pay with Paytm
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        function startPayment() {
+        function startPayment(method) {
             const options = {
                 key: '{{ razorpay_key_id }}',
                 amount: {{ total_amount|floatformat:0 }} * 100, // Amount in paisa
@@ -200,6 +230,7 @@
                 name: '{{ shop.name }}',
                 description: 'Laundry Service Order #{{ order.id }}',
                 order_id: '{{ razorpay_order_id }}',
+                method: method,
                 handler: function (response) {
                     // Handle successful payment
                     const form = document.createElement('form');

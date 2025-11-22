@@ -529,24 +529,6 @@
             background: #5c9cc7ff;
         }
 
-        /* --- Fixed Back-to-Top Button (from the bottom right of your image) --- */
-        .back-to-top-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background:#0f334bff;
-            color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            z-index: 100;
-        }
-
 
         /* Media Query for smaller screens */
         @media (max-width: 768px) {
@@ -560,6 +542,151 @@
             .footer-col {
                 min-width: 100%;
             }
+        }
+
+        /* --- COMBINED WIDGET STYLES --- */
+        .combined-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+            padding-right: 20px;
+            align-items: flex-end; 
+        }
+
+        .up-arrow-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        .up-arrow-btn:hover { transform: scale(1.1); }
+
+        .chatbot {
+            width: 350px;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chatbot.show { display: flex; }
+
+        .chatbot-toggler {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        .chatbot-toggler:hover { transform: scale(1.1); }
+
+        .chatbot-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-actions i {
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .header-actions i:hover {
+            opacity: 0.7;
+        }
+
+        .chatbot-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+
+        .chatbot-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .message.bot {
+            background: var(--primary-color);
+            color: white;
+            align-self: flex-start;
+        }
+
+        .message.user {
+            background: #e1e1e1;
+            color: #333;
+            align-self: flex-end;
+        }
+
+        .chatbot-footer {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .chatbot-send {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .chatbot-send:hover { background: var(--accent-hover); }
+
+        @media (max-width: 480px) {
+            .chatbot { width: 90%; right: 5%; }
         }
         /* --- MEDIA QUERIES for Responsiveness --- */
         @media (max-width: 1024px) {
@@ -920,8 +1047,35 @@
             </div>
 
         </div>
-        <a href="#" class="back-to-top-btn"><i class="fas fa-arrow-up"></i></a>
     </footer>
+
+    <!-- Combined Widget: Up Arrow and Chatbot -->
+    <div class="combined-widget">
+        <div class="up-arrow-btn" id="up-arrow-btn">
+            <i class="fas fa-arrow-up"></i>
+        </div>
+        <div class="chatbot">
+            <div class="chatbot-header">
+                <div><i class="fas fa-robot"></i> AI Laundry Assistant</div>
+                <div class="header-actions">
+                    <i class="fas fa-minus" id="minimize-chat" title="Minimize"></i>
+                    <i class="fas fa-times" id="close-chat" title="Close"></i>
+                </div>
+            </div>
+            <div class="chatbot-body">
+                <div class="chatbot-messages" id="chatbot-messages">
+                    <div class="message bot">Hello! How can I help you with our laundry services today?</div>
+                </div>
+            </div>
+            <div class="chatbot-footer">
+                <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Type your message...">
+                <button id="chatbot-send" class="chatbot-send">Send</button>
+            </div>
+        </div>
+        <div class="chatbot-toggler" id="chatbot-toggler">
+            <i class="fas fa-comments"></i>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
@@ -960,6 +1114,88 @@
             768: { slidesPerView: 2, spaceBetween: 30 }, // Two cards on tablet
             1024: { slidesPerView: 3, spaceBetween: 30 }  // Three cards on desktop
         }
+    });
+
+    // CHATBOT FUNCTIONALITY
+    const chatbotToggler = document.getElementById('chatbot-toggler');
+    const chatbot = document.querySelector('.chatbot');
+    const chatbotMessages = document.getElementById('chatbot-messages');
+    const chatbotInput = document.getElementById('chatbot-input');
+    const chatbotSend = document.getElementById('chatbot-send');
+
+    chatbotToggler.addEventListener('click', () => {
+        chatbot.classList.toggle('show');
+    });
+
+    function addMessage(message, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', sender);
+        msgDiv.textContent = message;
+        chatbotMessages.appendChild(msgDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    function getBotResponse(userMessage) {
+        const msg = userMessage.toLowerCase();
+        if (msg.includes('price') || msg.includes('cost')) {
+            return 'Our prices start from ₹60/kg for wash & fold. Check our pricing section for more details!';
+        } else if (msg.includes('service') || msg.includes('what do you do')) {
+            return 'We offer laundry, dry cleaning, carpet cleaning, and more. Free pickup and delivery!';
+        } else if (msg.includes('contact') || msg.includes('phone')) {
+            return 'Call us at +(91) 8547189033 for any inquiries.';
+        } else if (msg.includes('login') || msg.includes('how to login') || msg.includes('sign in')) {
+            return 'To login, click on the "Login" link in the navigation menu. If you don\'t have an account, you can register using the "Register" link.';
+        } else if (msg.includes('store') || msg.includes('shop') || msg.includes('how many')) {
+            return 'We currently have 4 approved laundry stores available in our network. You can find them by logging in and checking the dashboard!';
+        } else if (msg.includes('thank') || msg.includes('bye') || msg.includes('nice day')) {
+            return 'You\'re welcome! Have a nice day!';
+        } else if (msg.includes('hello') || msg.includes('hi')) {
+            return 'Hi there! How can I assist you today?';
+        } else {
+            return 'I\'m here to help with laundry services. Ask me about prices, services, contact info, login, or our stores!';
+        }
+    }
+
+    chatbotSend.addEventListener('click', () => {
+        const message = chatbotInput.value.trim();
+        if (message) {
+            addMessage(message, 'user');
+            chatbotInput.value = '';
+            setTimeout(() => {
+                const response = getBotResponse(message);
+                addMessage(response, 'bot');
+            }, 1000);
+        }
+    });
+
+    chatbotInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            chatbotSend.click();
+        }
+    });
+
+    // Minimize and Close Chat
+    document.getElementById('minimize-chat').addEventListener('click', () => {
+        chatbot.classList.remove('show');
+    });
+
+    document.getElementById('close-chat').addEventListener('click', () => {
+        chatbot.classList.remove('show');
+    });
+
+    // BACK-TO-TOP BUTTON FUNCTIONALITY
+    const upArrowBtn = document.getElementById('up-arrow-btn');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            upArrowBtn.style.display = 'flex';
+        } else {
+            upArrowBtn.style.display = 'none';
+        }
+    });
+
+    upArrowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     </script>
 

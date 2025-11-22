@@ -22,32 +22,48 @@
     <div class="page-container">
         <h1 class="page-header">My Orders 🧺</h1>
 
-        <h2>Current Orders</h2>
-        <div class="order-card">
-            <div class="order-header">
-                <span>Order #1001</span>
-                <span class="order-status status-processing">In Process</span>
+        {% if orders %}
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <span>Order #{{ order.id }}</span>
+                    <span class="order-status
+                        {% if order.cloth_status == 'Pending' %}status-processing
+                        {% elif order.cloth_status == 'Completed' %}status-delivered
+                        {% else %}status-processing{% endif %}">
+                        {{ order.get_cloth_status_display }}
+                    </span>
+                </div>
+                <div class="order-details">
+                    <p><strong>Shop:</strong> {{ order.shop.name }}</p>
+                    <p><strong>Total Amount:</strong> ₹{{ order.amount }}</p>
+                    <p><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+
+                    {% if order.delivery_name %}
+                    <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                        <p style="margin: 0; font-weight: bold; color: #0f334bff;">Delivery Details:</p>
+                        <p style="margin: 5px 0;"><strong>Name:</strong> {{ order.delivery_name }}</p>
+                        {% if order.delivery_address %}
+                        <p style="margin: 5px 0;"><strong>Address:</strong> {{ order.delivery_address }}</p>
+                        {% endif %}
+                        {% if order.delivery_phone %}
+                        <p style="margin: 5px 0;"><strong>Phone:</strong> {{ order.delivery_phone }}</p>
+                        {% endif %}
+                        {% if order.special_instructions %}
+                        <p style="margin: 5px 0;"><strong>Instructions:</strong> {{ order.special_instructions }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-            <div class="order-details">
-                <p>Items: 5 Shirts, 2 Pants</p>
-                <p>Scheduled Pickup: 2025-11-19, 10:00 AM</p>
-                <p>Estimated Delivery: 2025-11-21</p>
-                <a href="#" style="color: #0f334bff; text-decoration: none; font-size: 14px; margin-top: 5px; display: inline-block;">View Details</a>
+            {% endfor %}
+        {% else %}
+            <div class="order-card">
+                <div class="order-details">
+                    <p style="text-align: center; color: #666;">No orders found. <a href="{% url 'dashboard' %}" style="color: #0f334bff;">Start shopping</a></p>
+                </div>
             </div>
-        </div>
-        
-        <h2 style="margin-top: 30px;">Past Orders</h2>
-        <div class="order-card">
-            <div class="order-header">
-                <span>Order #987</span>
-                <span class="order-status status-delivered">Delivered</span>
-            </div>
-            <div class="order-details">
-                <p>Items: 1 Bed Sheet, 3 Towels</p>
-                <p>Delivered On: 2025-11-10</p>
-                <p>Total Cost: ₹250</p>
-            </div>
-        </div>
+        {% endif %}
     </div>
 </body>
 </html>

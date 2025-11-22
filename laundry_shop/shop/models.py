@@ -61,6 +61,12 @@ class Order(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Delivery details
+    delivery_name = models.CharField(max_length=255, blank=True, null=True)
+    delivery_address = models.TextField(blank=True, null=True)
+    delivery_phone = models.CharField(max_length=20, blank=True, null=True)
+    special_instructions = models.TextField(blank=True, null=True)
+
 class Service(models.Model):
     branch = models.ForeignKey('Branch', on_delete=models.CASCADE, related_name='services')
     name = models.CharField(max_length=120)

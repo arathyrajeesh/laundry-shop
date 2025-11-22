@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.utils.translation import activate, get_language
-from .forms import ProfileForm,BranchForm,ServiceForm
+from .forms import ProfileForm,BranchForm,ServiceForm,UserDetailsForm
 # NOTE: Assuming you have Profile, Order, and LaundryShop models
 from .models import Profile, Order, LaundryShop ,Service,Branch
 from django.contrib.auth import authenticate, login, logout
@@ -19,11 +19,10 @@ from django.http import HttpResponse, JsonResponse # Added for placeholder views
 from django.db.models import Count, Q
 from datetime import datetime
 from django.views.decorators.http import require_POST
+import uuid
+from django.http import HttpResponseRedirect
+
 # --- DUMMY DATA (FOR VIEWS) ---
-DUMMY_SHOPS = [
-    {'id': 1, 'name': 'QuickClean Laundry', 'address': '123 Main St, Kannur'},
-    {'id': 2, 'name': 'SparkleWash Express', 'address': '456 Commercial Rd, Kannur'},
-]
 
 # NOTE: The dashboard template expects a 'cloth_status' list. 
 # We'll use the user's last 5 orders as a stand-in.
@@ -228,7 +227,6 @@ def user_dashboard(request):
         "pending_count": pending,
         "completed_count": completed,
         "total_spent": spent,
-        "shops": DUMMY_SHOPS,         # Added for the 'Current Available Laundry Shops' section
         "cloth_status": cloth_status, # Added for the 'Your Cloth Status' table
         "services_nearby": services_nearby,
         "shops_nearby": shops_nearby,
@@ -370,7 +368,8 @@ def my_orders(request):
 def billing_payments(request):
     """Renders the Billing & Payments page."""
     # Pass billing/payment data here
-    return render(request, 'billing.html')
+    user_orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'billing.html', {'orders': user_orders})
 
 @login_required
 def shop_detail(request, shop_id):
@@ -502,17 +501,71 @@ def create_order(request, shop_id):
 
     # Store Razorpay order ID in session
     request.session['razorpay_order_id'] = razorpay_order['id']
+    request.session['total_amount'] = float(total_amount)
+
+    # Redirect to user details page
+    return redirect('user_details')
+
+
+@login_required
+def payment(request):
+    """Render payment page for the order."""
+    order_id = request.session.get('order_id')
+    if not order_id:
+        messages.error(request, 'No order found. Please start over.')
+        return redirect('dashboard')
+
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    # Get order items from session
+    order_items = request.session.get('order_items', [])
+    total_amount = request.session.get('total_amount', order.amount)
+
+    # Razorpay details
+    razorpay_order_id = request.session.get('razorpay_order_id')
+    if not razorpay_order_id:
+        messages.error(request, 'Payment session expired. Please try again.')
+        return redirect('dashboard')
 
     context = {
         'order': order,
         'order_items': order_items,
         'total_amount': total_amount,
-        'razorpay_order_id': razorpay_order['id'],
+        'razorpay_order_id': razorpay_order_id,
         'razorpay_key_id': settings.RAZORPAY_KEY_ID,
-        'shop': shop,
+        'shop': order.shop,
     }
 
     return render(request, 'payment.html', context)
+
+
+@login_required
+def user_details(request):
+    """Collect user delivery details before payment."""
+    order_id = request.session.get('order_id')
+    if not order_id:
+        messages.error(request, 'No order found. Please start over.')
+        return redirect('dashboard')
+
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if request.method == 'POST':
+        form = UserDetailsForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Delivery details saved successfully.')
+            return redirect('payment')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = UserDetailsForm(instance=order)
+
+    context = {
+        'form': form,
+        'order': order,
+    }
+
+    return render(request, 'user_details.html', context)
 
 
 @login_required
@@ -538,6 +591,44 @@ def payment_success(request):
             order = get_object_or_404(Order, id=order_id, user=request.user)
             order.cloth_status = 'Washing'  # Move to next status
             order.save()
+
+            # Send payment success email
+            payment_success_message = f"""
+Hi {order.user.get_full_name() or order.user.username},
+
+Your payment has been successfully processed!
+
+Order Details:
+- Order ID: #{order.id}
+- Amount Paid: ₹{order.amount}
+- Shop: {order.shop.name}
+- Status: {order.get_cloth_status_display()}
+
+Delivery Information:
+- Name: {order.delivery_name or 'Not provided'}
+- Address: {order.delivery_address or 'Not provided'}
+- Phone: {order.delivery_phone or 'Not provided'}
+
+Your laundry will be processed shortly. You can track your order status in your dashboard.
+
+Thank you for choosing Shine & Bright!
+
+Best regards,
+Shine & Bright Team
+🧺✨
+"""
+
+            try:
+                send_mail(
+                    subject=f"Payment Successful - Order #{order.id}",
+                    message=payment_success_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[order.user.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                # Log the error but don't fail the payment
+                print(f"Failed to send payment success email: {e}")
 
             # Clear session
             request.session.pop('order_items', None)
@@ -1037,3 +1128,4 @@ def delete_service(request, service_id):
     service.delete()
     messages.success(request, 'Service deleted.')
     return redirect('shop_dashboard')
+

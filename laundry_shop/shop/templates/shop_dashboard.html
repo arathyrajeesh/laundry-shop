@@ -52,6 +52,129 @@
             align-items: center;
         }
 
+        /* Notification Dropdown */
+        .notification-container {
+            position: relative;
+        }
+
+        .notification-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s;
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            background: rgba(15, 51, 75, 0.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 350px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px 0;
+            display: none;
+            z-index: 1000;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+        }
+
+        .notification-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .notification-message {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .notification-footer {
+            padding: 10px 20px 5px;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+
+        .notification-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .notification-footer a:hover {
+            text-decoration: underline;
+        }
+
         .btn {
             padding: 10px 20px;
             border-radius: 5px;
@@ -294,6 +417,42 @@
     <div class="shop-header">
         <h1><i class="fas fa-store"></i> {{ shop.name }} - Dashboard</h1>
         <div class="header-actions">
+            <div class="notification-container">
+                <button class="notification-btn" id="notification-trigger">
+                    <i class="fas fa-bell"></i>
+                    {% if shop_notifications|length > 0 %}
+                        <span class="notification-badge">{{ shop_notifications|length }}</span>
+                    {% endif %}
+                </button>
+
+                <div id="notification-dropdown-menu" class="notification-dropdown">
+                    {% if shop_notifications %}
+                        {% for notification in shop_notifications %}
+                            <div class="notification-item">
+                                <div class="notification-icon" style="background: {{ notification.color }};">
+                                    <i class="{{ notification.icon }}"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-title">{{ notification.title }}</div>
+                                    <div class="notification-message">{{ notification.message }}</div>
+                                    <div class="notification-time">{{ notification.time|date:"M d, H:i" }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="notification-footer">
+                            <a href="{% url 'shop_notifications' %}">View All Notifications</a>
+                        </div>
+                    {% else %}
+                        <div class="notification-item">
+                            <div style="text-align: center; padding: 20px; color: #999; width: 100%;">
+                                <i class="fas fa-bell-slash" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                                No new notifications
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <a href="{% url 'home' %}" class="btn btn-secondary">
                 <i class="fas fa-home"></i> Home
             </a>
@@ -540,14 +699,28 @@
 
 
     <script>
+        // Notification dropdown toggle
+        document.getElementById('notification-trigger').addEventListener('click', function() {
+            var dropdown = document.getElementById('notification-dropdown-menu');
+            dropdown.classList.toggle('show');
+        });
+
+        // Close notification dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            var container = document.querySelector('.notification-container');
+            if (!container.contains(e.target) && document.getElementById('notification-dropdown-menu').classList.contains('show')) {
+                document.getElementById('notification-dropdown-menu').classList.remove('show');
+            }
+        });
+
         function updateOrderStatus(orderId) {
             const statusSelect = document.getElementById(`status-${orderId}`);
             const newStatus = statusSelect.value;
-            
+
             const formData = new FormData();
             formData.append('status', newStatus);
             formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-            
+
             fetch(`/shop/order/${orderId}/update-status/`, {
                 method: 'POST',
                 body: formData,

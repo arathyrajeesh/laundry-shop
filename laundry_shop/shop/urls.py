@@ -33,6 +33,7 @@ urlpatterns = [
     path("settings/delete-account/", views.delete_account, name="delete_account"),
     path("help/", views.help_view, name="help"),
     path("notifications/", views.notifications_view, name="notifications"),
+    path("notifications/mark-read/", views.mark_notifications_read, name="mark_notifications_read"),
     path("orders/", views.my_orders, name="orders"),
     path("billing/", views.billing_payments, name="billing"),
 

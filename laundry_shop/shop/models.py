@@ -14,6 +14,9 @@ class Profile(models.Model):
     longitude = models.CharField(max_length=100, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
 
+    # Notification settings
+    notifications_enabled = models.BooleanField(default=True, help_text="Enable notification badges and alerts")
+
     def __str__(self):
         return self.user.username
 
@@ -99,3 +102,30 @@ class Branch(models.Model):
 
     def __str__(self):
         return f"{self.name} — {self.shop.name}"
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('order_placed', 'Order Placed'),
+        ('status_update', 'Status Update'),
+        ('ready_pickup', 'Ready for Pickup'),
+        ('completed', 'Order Completed'),
+        ('welcome', 'Welcome'),
+        ('profile_reminder', 'Profile Reminder'),
+        ('explore_services', 'Explore Services'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    icon = models.CharField(max_length=50, default='fas fa-bell')
+    color = models.CharField(max_length=20, default='#3498db')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.title}"

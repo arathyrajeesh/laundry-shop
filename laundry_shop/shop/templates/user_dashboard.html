@@ -149,7 +149,6 @@
             text-align: center;
         }
 
-        /* --- NEW DROPDOWN CSS --- */
         .header-actions {
             position: absolute;
             top: 20px;
@@ -160,127 +159,6 @@
             z-index: 100;
         }
 
-        /* Notification Dropdown */
-        .notification-container {
-            position: relative;
-        }
-
-        .notification-btn {
-            background: none;
-            border: none;
-            font-size: 18px;
-            color: #000000;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: background 0.3s;
-        }
-
-        .notification-btn:hover {
-            background: rgba(15, 51, 75, 0.1);
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #e74c3c;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .notification-dropdown {
-            position: absolute;
-            top: 45px;
-            right: 0;
-            width: 350px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            padding: 15px 0;
-            display: none;
-            z-index: 1000;
-        }
-
-        .notification-dropdown.show {
-            display: block;
-        }
-
-        .notification-item {
-            padding: 12px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: flex-start;
-            transition: background 0.2s;
-        }
-
-        .notification-item:hover {
-            background: #f8f9fa;
-        }
-
-        .notification-item:last-child {
-            border-bottom: none;
-        }
-
-        .notification-icon {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 3px;
-        }
-
-        .notification-message {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.3;
-        }
-
-        .notification-time {
-            font-size: 11px;
-            color: #999;
-            margin-top: 3px;
-        }
-
-        .notification-footer {
-            padding: 10px 20px 5px;
-            border-top: 1px solid #eee;
-            margin-top: 10px;
-        }
-
-        .notification-footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .notification-footer a:hover {
-            text-decoration: underline;
-        }
 
         .profile-pic-container {
             position: relative;
@@ -383,6 +261,20 @@
             border-top: 1px solid #eee;
             padding-top: 10px;
             margin-top: 15px;
+        }
+
+        .notification-badge {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
         }
 
         /* Search Bar Styles */
@@ -552,42 +444,6 @@
 <body>
 
     <div class="header-actions">
-        <div class="notification-container">
-            <button class="notification-btn" id="notification-trigger">
-                <i class="fas fa-bell"></i>
-                {% if unread_count > 0 %}
-                    <span class="notification-badge">{{ unread_count }}</span>
-                {% endif %}
-            </button>
-
-            <div id="notification-dropdown-menu" class="notification-dropdown">
-                {% if recent_notifications %}
-                    {% for notification in recent_notifications %}
-                        <div class="notification-item">
-                            <div class="notification-icon" style="background: {{ notification.color }};">
-                                <i class="{{ notification.icon }}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-title">{{ notification.title }}</div>
-                                <div class="notification-message">{{ notification.message }}</div>
-                                <div class="notification-time">{{ notification.time }}</div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                    <div class="notification-footer">
-                        <a href="{% url 'notifications' %}">View All Notifications</a>
-                    </div>
-                {% else %}
-                    <div class="notification-item">
-                        <div style="text-align: center; padding: 20px; color: #999; width: 100%;">
-                            <i class="fas fa-bell-slash" style="font-size: 24px; margin-bottom: 10px;"></i><br>
-                            No new notifications
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
         <div class="profile-pic-container">
             <img id="profile-trigger"
                     src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'default.png' %}{% endif %}"
@@ -606,6 +462,40 @@
                     </div>
                     <a href="{% url 'edit_profile' %}" class="view-profile-btn">Edit Profile</a>
                 </div>
+
+                <!-- Notifications Section -->
+                <div class="dropdown-section-title" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>Notifications</span>
+                    {% if unread_count > 0 %}
+                        <span class="notification-badge" style="position: static; display: inline-flex; margin: 0; font-size: 10px; padding: 2px 6px;">{{ unread_count }}</span>
+                    {% endif %}
+                </div>
+
+                {% if recent_notifications %}
+                    {% for notification in recent_notifications %}
+                        <div class="notification-item" style="padding: 12px 20px; margin: 0; border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
+                            <div class="notification-icon" style="background: {{ notification.color }}; width: 32px; height: 32px; font-size: 14px; margin-right: 12px;">
+                                <i class="{{ notification.icon }}"></i>
+                            </div>
+                            <div class="notification-content" style="flex: 1;">
+                                <div class="notification-title" style="font-size: 13px; font-weight: 600; margin-bottom: 2px;">{{ notification.title }}</div>
+                                <div class="notification-message" style="font-size: 12px; color: #666; line-height: 1.3;">{{ notification.message }}</div>
+                                <div class="notification-time" style="font-size: 11px; color: #999; margin-top: 2px;">{{ notification.time }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="notification-footer" style="padding: 10px 20px; background: rgba(15, 51, 75, 0.05); border-top: 1px solid rgba(0, 0, 0, 0.05);">
+                        <a href="{% url 'notifications' %}" style="font-size: 13px;">View All Notifications →</a>
+                    </div>
+                {% else %}
+                    <div class="notification-item" style="padding: 20px; text-align: center; border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
+                        <div style="color: #666;">
+                            <i class="fas fa-bell-slash" style="font-size: 20px; margin-bottom: 8px; color: #6c757d;"></i>
+                            <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">No New Notifications</div>
+                            <div style="font-size: 12px; color: #999;">You're all caught up!</div>
+                        </div>
+                    </div>
+                {% endif %}
 
                 <div class="dropdown-section-title">Account</div>
                 <div class="dropdown-item"><a href="{% url 'settings' %}">Settings & Privacy</a></div>
@@ -784,19 +674,12 @@
     </div>
 
     <script>
-        // Notification dropdown toggle
-        document.getElementById('notification-trigger').addEventListener('click', function() {
-            var dropdown = document.getElementById('notification-dropdown-menu');
-            var badge = document.querySelector('.notification-badge');
+        document.getElementById('profile-trigger').addEventListener('click', function() {
+            var dropdown = document.getElementById('profile-dropdown-menu');
             dropdown.classList.toggle('show');
 
-            // Mark notifications as read when dropdown is opened
+            // Mark notifications as read when profile dropdown is opened
             if (dropdown.classList.contains('show')) {
-                // Hide the badge immediately
-                if (badge) {
-                    badge.style.display = 'none';
-                }
-
                 // Send AJAX request to mark notifications as read
                 fetch('/notifications/mark-read/', {
                     method: 'POST',
@@ -809,25 +692,17 @@
                 .then(data => {
                     if (data.success) {
                         console.log('Notifications marked as read');
+                        // Hide notification badges in the dropdown
+                        var badges = dropdown.querySelectorAll('.notification-badge');
+                        badges.forEach(function(badge) {
+                            badge.style.display = 'none';
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error marking notifications as read:', error);
                 });
             }
-        });
-
-        // Close notification dropdown when clicking outside
-        window.addEventListener('click', function(e) {
-            var container = document.querySelector('.notification-container');
-            if (!container.contains(e.target) && document.getElementById('notification-dropdown-menu').classList.contains('show')) {
-                document.getElementById('notification-dropdown-menu').classList.remove('show');
-            }
-        });
-
-        document.getElementById('profile-trigger').addEventListener('click', function() {
-            var dropdown = document.getElementById('profile-dropdown-menu');
-            dropdown.classList.toggle('show');
         });
 
         // Optional: Close dropdown if user clicks outside

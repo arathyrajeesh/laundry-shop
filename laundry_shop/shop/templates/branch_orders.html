@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop Dashboard - {{ shop.name }}</title>
-    
+    <title>{{ branch.name }} Orders - {{ shop.name }}</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+
     <style>
         * {
             margin: 0;
@@ -29,7 +29,7 @@
         }
 
         /* Header */
-        .shop-header {
+        .header {
             background: white;
             padding: 20px 40px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -41,15 +41,23 @@
             z-index: 100;
         }
 
-        .shop-header h1 {
+        .header h1 {
             color: var(--primary-color);
             font-size: 28px;
         }
 
-        .shop-header .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
+        .header .breadcrumb {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .header .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .header .breadcrumb a:hover {
+            text-decoration: underline;
         }
 
         .btn {
@@ -63,15 +71,6 @@
             display: inline-block;
         }
 
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0a2538;
-        }
-
         .btn-secondary {
             background: #6c757d;
             color: white;
@@ -82,29 +81,32 @@
         }
 
         /* Container */
-        .shop-container {
+        .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px 40px;
         }
 
-        /* Welcome Section */
-        .welcome-section {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1a4d6e 100%);
-            color: white;
+        /* Branch Info */
+        .branch-info {
+            background: white;
             padding: 30px;
             border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .welcome-section h2 {
-            font-size: 32px;
-            margin-bottom: 10px;
+        .branch-details h2 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
         }
 
-        .welcome-section p {
-            font-size: 16px;
-            opacity: 0.9;
+        .branch-details p {
+            color: #666;
+            margin-bottom: 5px;
         }
 
         /* Stats Grid */
@@ -229,14 +231,6 @@
         .status-ready { background: #cce5ff; color: #004085; }
         .status-completed { background: #d4edda; color: #155724; }
 
-        .status-select {
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
         .update-btn {
             padding: 5px 15px;
             background: var(--accent-color);
@@ -265,7 +259,7 @@
         }
 
         @media (max-width: 768px) {
-            .shop-container {
+            .container {
                 padding: 20px 15px;
             }
 
@@ -282,32 +276,53 @@
                 padding: 10px 5px;
             }
 
-            .shop-header {
+            .header {
                 padding: 15px 20px;
                 flex-direction: column;
                 gap: 15px;
+                text-align: center;
+            }
+
+            .branch-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="shop-header">
-        <h1><i class="fas fa-store"></i> {{ shop.name }} - Dashboard</h1>
-        <div class="header-actions">
-            <a href="{% url 'home' %}" class="btn btn-secondary">
-                <i class="fas fa-home"></i> Home
-            </a>
-            <a href="{% url 'shop_logout' %}" class="btn btn-secondary">
-                <i class="fas fa-sign-out-alt"></i> Logout
+    <div class="header">
+        <div>
+            <h1><i class="fas fa-store"></i> {{ shop.name }}</h1>
+            <div class="breadcrumb">
+                <a href="{% url 'shop_dashboard' %}">Dashboard</a> >
+                <a href="{% url 'select_branch' %}">Select Branch</a> >
+                {{ branch.name }}
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'select_branch' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Branches
             </a>
         </div>
     </div>
 
-    <div class="shop-container">
-        <!-- Welcome Section -->
-        <div class="welcome-section">
-            <h2>Welcome, {{ shop.name }}!</h2>
-            <p>Manage your orders and track your business performance</p>
+    <div class="container">
+        <!-- Branch Info -->
+        <div class="branch-info">
+            <div class="branch-details">
+                <h2><i class="fas fa-map-marker-alt"></i> {{ branch.name }}</h2>
+                <p><strong>Address:</strong> {{ branch.address }}</p>
+                {% if branch.phone %}
+                <p><strong>Phone:</strong> {{ branch.phone }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'edit_branch' branch.id %}" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i> Edit Branch
+                </a>
+            </div>
         </div>
 
         <!-- Statistics Cards -->
@@ -373,49 +388,65 @@
             </div>
         </div>
 
-        <!-- Branch Overview -->
+        <!-- Services Management -->
         <div class="dashboard-section">
             <div class="section-header">
-                <h2><i class="fas fa-store-alt"></i> Branch Overview</h2>
-                <a href="{% url 'select_branch' %}" class="btn btn-primary">
-                    <i class="fas fa-eye"></i> View Branch Orders
+                <h2><i class="fas fa-concierge-bell"></i> Services for {{ branch.name }}</h2>
+                <a href="{% url 'add_service_branch' branch.id %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Service
                 </a>
             </div>
 
-            {% if branch_stats %}
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
-                {% for stat in branch_stats %}
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-card-value">{{ stat.total_orders }}</div>
-                            <div class="stat-card-label">{{ stat.branch.name }}</div>
-                        </div>
-                        <div class="stat-card-icon icon-blue">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                    </div>
-                    <div style="margin-top: 15px; display: flex; justify-content: space-between; font-size: 14px;">
-                        <span>Pending: <strong>{{ stat.pending_orders }}</strong></span>
-                        <span>Completed: <strong>{{ stat.completed_orders }}</strong></span>
-                        <span>Revenue: <strong>₹{{ stat.revenue|floatformat:0 }}</strong></span>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+            {% if branch.services.all %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Service Name</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in branch.services.all %}
+                    <tr>
+                        <td>{{ service.name }}</td>
+                        <td>
+                            {% if service.price %}
+                            ₹{{ service.price|floatformat:2 }}
+                            {% else %}
+                            <span style="color: #666;">Not set</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'edit_service' service.id %}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form method="post" action="{% url 'delete_service' service.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this service?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; background: #dc3545;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             {% else %}
             <div class="empty-state">
-                <i class="fas fa-store-alt"></i>
-                <p>No branches found. Add branches to get started.</p>
-                <a href="{% url 'add_branch' %}" class="btn btn-primary" style="margin-top:15px;">Add Branch</a>
+                <i class="fas fa-concierge-bell"></i>
+                <p>No services added for this branch yet.</p>
+                <a href="{% url 'add_service_branch' branch.id %}" class="btn btn-primary" style="margin-top: 15px;">
+                    <i class="fas fa-plus"></i> Add First Service
+                </a>
             </div>
             {% endif %}
         </div>
 
-        <!-- Recent Orders Across All Branches -->
+        <!-- Orders -->
         <div class="dashboard-section">
             <div class="section-header">
-                <h2><i class="fas fa-receipt"></i> Recent Orders (All Branches)</h2>
+                <h2><i class="fas fa-receipt"></i> Orders for {{ branch.name }}</h2>
             </div>
             {% if recent_orders %}
             <table class="data-table">
@@ -423,7 +454,6 @@
                     <tr>
                         <th>Order ID</th>
                         <th>Customer</th>
-                        <th>Branch</th>
                         <th>Pickup Date</th>
                         <th>Delivery Date</th>
                         <th>Status</th>
@@ -437,7 +467,6 @@
                     <tr>
                         <td>#{{ order.id }}</td>
                         <td>{{ order.user.username }}</td>
-                        <td>{{ order.branch.name }}</td>
                         <td>{{ order.pickup_date|date:"M d, Y H:i" }}</td>
                         <td>{{ order.delivery_date|date:"M d, Y H:i" }}</td>
                         <td>
@@ -465,89 +494,21 @@
             {% else %}
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
-                <p>No orders yet</p>
+                <p>No orders found for this branch</p>
             </div>
             {% endif %}
         </div>
     </div>
-            <!-- Branch & Service Management Section -->
-    <!-- Branch & Service Management Section -->
-    <div class="dashboard-section">
-        <div class="section-header">
-            <h2><i class="fas fa-store-alt"></i> Branches & Services</h2>
-            <a href="{% url 'add_branch' %}" class="btn btn-primary">+ Add Branch</a>
-        </div>
-
-        {% if branches %}
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Branch Name</th>
-                    <th>Address</th>
-                    <th>Services Offered</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for branch in branches %}
-                <tr>
-                    <td>{{ branch.name }}</td>
-                    <td>{{ branch.address }}</td>
-
-                    <td>
-                        {% if branch.services.all %}
-                            {% for s in branch.services.all %}
-                                <span class="status-badge status-ready">{{ s.name }}</span>
-                            {% endfor %}
-                        {% else %}
-                            <span class="status-badge status-pending">No Services</span>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        <a href="{% url 'edit_branch' branch.id %}" 
-                        class="btn btn-primary" 
-                        style="padding:6px 10px;font-size:12px;">
-                        Edit
-                        </a>
-
-                        <a href="{% url 'delete_branch' branch.id %}" 
-                        class="btn btn-secondary" 
-                        style="padding:6px 10px;font-size:12px;">
-                        Delete
-                        </a>
-
-                        <a href="{% url 'add_service_branch' branch.id %}"
-                        class="btn btn-primary"
-                        style="padding:6px 10px;font-size:12px;background:#9b59b6;">
-                        Add Service
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        {% else %}
-        <div class="empty-state">
-            <i class="fas fa-map-marker-alt"></i>
-            <p>No branches added yet</p>
-            <a href="{% url 'add_branch' %}" class="btn btn-primary" style="margin-top:15px;">Add Branch</a>
-        </div>
-        {% endif %}
-    </div>
-
 
     <script>
         function updateOrderStatus(orderId) {
             const statusSelect = document.getElementById(`status-${orderId}`);
             const newStatus = statusSelect.value;
-            
+
             const formData = new FormData();
             formData.append('status', newStatus);
             formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-            
+
             fetch(`/shop/order/${orderId}/update-status/`, {
                 method: 'POST',
                 body: formData,
@@ -587,4 +548,3 @@
     </script>
 </body>
 </html>
-

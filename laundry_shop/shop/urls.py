@@ -16,7 +16,9 @@ urlpatterns = [
 
     # SHOPS
     path("shop/<int:shop_id>/", views.shop_detail, name="shop_detail"),
+    path("shop/<int:shop_id>/select-branch/", views.select_branch_for_order, name="select_branch_for_order"),
     path("shop/<int:shop_id>/select-services/", views.select_services, name="select_services"),
+    path("shop/<int:shop_id>/branch/<int:branch_id>/select-services/", views.select_services, name="select_services_branch"),
     path("shop/<int:shop_id>/create-order/", views.create_order, name="create_order"),
     path("user-details/", views.user_details, name="user_details"),
     path("payment/", views.payment, name="payment"),
@@ -47,6 +49,8 @@ urlpatterns = [
     path("shop/login/", views.shop_login, name="shop_login"),
     path("shop/logout/", views.shop_logout, name="shop_logout"),
     path("shop/dashboard/", views.shop_dashboard, name="shop_dashboard"),
+    path("shop/select-branch/", views.select_branch, name="select_branch"),
+    path("shop/branch/<int:branch_id>/orders/", views.branch_orders, name="branch_orders"),
     path("shop/order/<int:order_id>/update-status/", views.shop_update_order_status, name="shop_update_order_status"),
     # Branch & Service URLs (shop-level)
     path('shop/branch/add/', views.add_branch, name='add_branch'),
@@ -56,6 +60,7 @@ urlpatterns = [
     # Service: can pass branch_id to auto-attach after create
     path('shop/service/add/', views.add_service, name='add_service'),
     path("service/add/<int:branch_id>/", views.add_service, name="add_service_branch"),
+    path('shop/service/<int:service_id>/edit/', views.edit_service, name='edit_service'),
     path('shop/service/<int:service_id>/delete/', views.delete_service, name='delete_service'),
 
 ]

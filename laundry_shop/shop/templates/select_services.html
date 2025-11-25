@@ -226,11 +226,24 @@
 </head>
 <body>
     <div class="header">
-        <h1><i class="fas fa-store"></i> {{ shop.name }}</h1>
         <div>
-            <a href="{% url 'shop_detail' shop.id %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Shop
-            </a>
+            <h1><i class="fas fa-store"></i> {{ shop.name }}</h1>
+            {% if branch %}
+                <div style="color: #666; font-size: 14px; margin-top: 5px;">
+                    <i class="fas fa-map-marker-alt"></i> Ordering from: {{ branch.name }}
+                </div>
+            {% endif %}
+        </div>
+        <div>
+            {% if branch %}
+                <a href="{% url 'select_branch_for_order' shop.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Change Branch
+                </a>
+            {% else %}
+                <a href="{% url 'shop_detail' shop.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Shop
+                </a>
+            {% endif %}
         </div>
     </div>
 
@@ -238,7 +251,14 @@
         <!-- Shop Header -->
         <div class="shop-header">
             <h1>Select Your Services</h1>
-            <p>Choose the services you need from {{ shop.name }}</p>
+            {% if branch %}
+                <p>Choose the services you need from {{ branch.name }} branch</p>
+                <div style="margin-top: 15px; font-size: 14px; color: #666;">
+                    <i class="fas fa-map-marker-alt"></i> {{ branch.address }}
+                </div>
+            {% else %}
+                <p>Choose the services you need from {{ shop.name }}</p>
+            {% endif %}
         </div>
 
         <!-- Services Section -->

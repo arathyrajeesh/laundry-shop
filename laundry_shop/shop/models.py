@@ -57,6 +57,7 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     shop = models.ForeignKey(LaundryShop, on_delete=models.SET_NULL, null=True)
+    branch = models.ForeignKey('Branch', on_delete=models.SET_NULL, null=True, blank=True)
     cloth_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -66,6 +67,10 @@ class Order(models.Model):
     delivery_address = models.TextField(blank=True, null=True)
     delivery_phone = models.CharField(max_length=20, blank=True, null=True)
     special_instructions = models.TextField(blank=True, null=True)
+
+    # Pickup and delivery dates
+    pickup_date = models.DateTimeField(blank=True, null=True)
+    delivery_date = models.DateTimeField(blank=True, null=True)
 
 class Service(models.Model):
     branch = models.ForeignKey('Branch', on_delete=models.CASCADE, related_name='services')

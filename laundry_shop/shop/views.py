@@ -413,17 +413,41 @@ def branch_detail(request, branch_id):
 
 
 @login_required
-def select_services(request, shop_id):
-    """Renders the service selection page for a shop."""
+def select_branch_for_order(request, shop_id):
+    """Customer selects a branch to place an order from."""
     shop = get_object_or_404(LaundryShop, id=shop_id, is_approved=True)
 
-    # Get all services for this shop across all branches
-    services = Service.objects.filter(branch__shop=shop).select_related('branch')
+    branches = Branch.objects.filter(shop=shop).prefetch_related('services')
 
     context = {
         'shop': shop,
-        'services': services,
+        'branches': branches,
     }
+
+    return render(request, 'select_branch_order.html', context)
+
+
+@login_required
+def select_services(request, shop_id, branch_id=None):
+    """Renders the service selection page for a shop/branch."""
+    shop = get_object_or_404(LaundryShop, id=shop_id, is_approved=True)
+
+    if branch_id:
+        # Services for specific branch
+        branch = get_object_or_404(Branch, id=branch_id, shop=shop)
+        services = Service.objects.filter(branch=branch)
+        context = {
+            'shop': shop,
+            'branch': branch,
+            'services': services,
+        }
+    else:
+        # Get all services for this shop across all branches (legacy support)
+        services = Service.objects.filter(branch__shop=shop).select_related('branch')
+        context = {
+            'shop': shop,
+            'services': services,
+        }
 
     return render(request, 'select_services.html', context)
 
@@ -444,6 +468,7 @@ def create_order(request, shop_id):
     # Calculate total amount
     total_amount = 0
     order_items = []
+    branch = None
 
     for service_id in selected_services:
         try:
@@ -451,6 +476,13 @@ def create_order(request, shop_id):
             quantity = int(request.POST.get(f'quantity_{service_id}', 1))
             if quantity < 1:
                 quantity = 1
+
+            # Ensure all services are from the same branch
+            if branch is None:
+                branch = service.branch
+            elif branch != service.branch:
+                messages.error(request, 'All selected services must be from the same branch.')
+                return redirect('select_services', shop_id=shop_id)
 
             if service.price:
                 item_total = service.price * quantity
@@ -468,10 +500,15 @@ def create_order(request, shop_id):
         messages.error(request, 'Unable to calculate order total. Please try again.')
         return redirect('select_services', shop_id=shop_id)
 
+    if branch is None:
+        messages.error(request, 'Unable to determine branch for order. Please try again.')
+        return redirect('select_services', shop_id=shop_id)
+
     # Create order in database
     order = Order.objects.create(
         user=request.user,
         shop=shop,
+        branch=branch,
         amount=total_amount,
         cloth_status='Pending'
     )
@@ -969,36 +1006,102 @@ def shop_login_required(view_func):
 
 @shop_login_required
 def shop_dashboard(request):
-    """Shop dashboard."""
+    """Main shop dashboard with branch overview."""
     shop_id = request.session.get('shop_id')
     shop = get_object_or_404(LaundryShop, id=shop_id)
-    
-    # Get shop's orders
-    shop_orders = Order.objects.filter(shop=shop).order_by('-created_at')
-    
-    # Statistics
+
+    # Get all branches for this shop
+    branches = Branch.objects.filter(shop=shop).prefetch_related('services')
+
+    # Get overall shop statistics
+    shop_orders = Order.objects.filter(shop=shop)
     total_orders = shop_orders.count()
     pending_orders = shop_orders.filter(cloth_status="Pending").count()
-    washing_orders = shop_orders.filter(cloth_status="Washing").count()
-    drying_orders = shop_orders.filter(cloth_status="Drying").count()
-    ironing_orders = shop_orders.filter(cloth_status="Ironing").count()
-    ready_orders = shop_orders.filter(cloth_status="Ready").count()
     completed_orders = shop_orders.filter(cloth_status="Completed").count()
     total_revenue = shop_orders.aggregate(total=Sum('amount'))['total'] or 0
-    
+
     # Today's revenue
     today_revenue = shop_orders.filter(
         created_at__date=datetime.now().date()
     ).aggregate(total=Sum('amount'))['total'] or 0
-    
-    # Recent orders
-    recent_orders = shop_orders.select_related('user')[:10]
 
-    # Branches
+    # Recent orders across all branches
+    recent_orders = Order.objects.filter(shop=shop).select_related('user', 'branch').order_by('-created_at')[:10]
+
+    # Branch statistics
+    branch_stats = []
+    for branch in branches:
+        branch_orders = Order.objects.filter(branch=branch)
+        branch_stats.append({
+            'branch': branch,
+            'total_orders': branch_orders.count(),
+            'pending_orders': branch_orders.filter(cloth_status="Pending").count(),
+            'completed_orders': branch_orders.filter(cloth_status="Completed").count(),
+            'revenue': branch_orders.aggregate(total=Sum('amount'))['total'] or 0,
+        })
+
+    context = {
+        'shop': shop,
+        'branches': branches,
+        'total_orders': total_orders,
+        'pending_orders': pending_orders,
+        'completed_orders': completed_orders,
+        'total_revenue': total_revenue,
+        'today_revenue': today_revenue,
+        'recent_orders': recent_orders,
+        'branch_stats': branch_stats,
+    }
+
+    return render(request, 'shop_dashboard.html', context)
+
+
+@shop_login_required
+def select_branch(request):
+    """Page to select a branch for viewing orders."""
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+
     branches = Branch.objects.filter(shop=shop).prefetch_related('services')
 
     context = {
         'shop': shop,
+        'branches': branches,
+    }
+
+    return render(request, 'select_branch.html', context)
+
+
+@shop_login_required
+def branch_orders(request, branch_id):
+    """View orders for a specific branch."""
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+    branch = get_object_or_404(Branch, id=branch_id, shop=shop)
+
+    # Get orders for this branch
+    branch_orders = Order.objects.filter(branch=branch).order_by('-created_at')
+
+    # Statistics for this branch
+    total_orders = branch_orders.count()
+    pending_orders = branch_orders.filter(cloth_status="Pending").count()
+    washing_orders = branch_orders.filter(cloth_status="Washing").count()
+    drying_orders = branch_orders.filter(cloth_status="Drying").count()
+    ironing_orders = branch_orders.filter(cloth_status="Ironing").count()
+    ready_orders = branch_orders.filter(cloth_status="Ready").count()
+    completed_orders = branch_orders.filter(cloth_status="Completed").count()
+    total_revenue = branch_orders.aggregate(total=Sum('amount'))['total'] or 0
+
+    # Today's revenue for this branch
+    today_revenue = branch_orders.filter(
+        created_at__date=datetime.now().date()
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # Recent orders for this branch
+    recent_orders = branch_orders.select_related('user')[:20]  # Show more orders on branch page
+
+    context = {
+        'shop': shop,
+        'branch': branch,
         'total_orders': total_orders,
         'pending_orders': pending_orders,
         'washing_orders': washing_orders,
@@ -1009,10 +1112,9 @@ def shop_dashboard(request):
         'total_revenue': total_revenue,
         'today_revenue': today_revenue,
         'recent_orders': recent_orders,
-        'branches': branches,
     }
-    
-    return render(request, 'shop_dashboard.html', context)
+
+    return render(request, 'branch_orders.html', context)
 
 
 @shop_login_required
@@ -1022,20 +1124,20 @@ def shop_update_order_status(request, order_id):
         shop_id = request.session.get('shop_id')
         shop = get_object_or_404(LaundryShop, id=shop_id)
         order = get_object_or_404(Order, id=order_id)
-        
+
         # Verify that the order belongs to this shop
         if order.shop != shop:
             return JsonResponse({'success': False, 'message': 'You do not have permission to update this order'}, status=403)
-        
+
         new_status = request.POST.get('status')
-        
+
         if new_status in dict(Order.STATUS_CHOICES):
             order.cloth_status = new_status
             order.save()
             return JsonResponse({'success': True, 'message': 'Order status updated successfully'})
         else:
             return JsonResponse({'success': False, 'message': 'Invalid status'}, status=400)
-    
+
     return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
 
@@ -1120,12 +1222,38 @@ def add_service(request, branch_id):
 
 
 @shop_login_required
+def edit_service(request, service_id):
+    shop_id = request.session.get('shop_id')
+    shop = get_object_or_404(LaundryShop, id=shop_id)
+    service = get_object_or_404(Service, id=service_id, branch__shop=shop)
+
+    if request.method == 'POST':
+        form = ServiceForm(request.POST, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Service updated successfully.')
+            return redirect('branch_orders', branch_id=service.branch.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ServiceForm(instance=service)
+
+    return render(request, 'edit_service.html', {
+        'form': form,
+        'shop': shop,
+        'service': service,
+        'branch': service.branch
+    })
+
+
+@shop_login_required
 @require_POST
 def delete_service(request, service_id):
     shop_id = request.session.get('shop_id')
     shop = get_object_or_404(LaundryShop, id=shop_id)
     service = get_object_or_404(Service, id=service_id, branch__shop=shop)
+    branch_id = service.branch.id
     service.delete()
     messages.success(request, 'Service deleted.')
-    return redirect('shop_dashboard')
+    return redirect('branch_orders', branch_id=branch_id)
 

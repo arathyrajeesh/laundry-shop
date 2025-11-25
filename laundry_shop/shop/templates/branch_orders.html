@@ -454,6 +454,7 @@
                     <tr>
                         <th>Order ID</th>
                         <th>Customer</th>
+                        <th>Customer Details</th>
                         <th>Pickup Date</th>
                         <th>Delivery Date</th>
                         <th>Status</th>
@@ -467,6 +468,13 @@
                     <tr>
                         <td>#{{ order.id }}</td>
                         <td>{{ order.user.username }}</td>
+                        <td>
+                            <strong>Name:</strong> {{ order.delivery_name|default:"Not provided" }}<br>
+                            <strong>Phone:</strong> {{ order.delivery_phone|default:"Not provided" }}<br>
+                            <strong>Email:</strong> {{ order.user.email }}<br>
+                            <strong>Address:</strong> {{ order.delivery_address|default:"Not provided"|truncatechars:30 }}<br>
+                            <strong>City:</strong> {{ order.user.profile.city|default:"Not provided" }}
+                        </td>
                         <td>{{ order.pickup_date|date:"M d, Y H:i" }}</td>
                         <td>{{ order.delivery_date|date:"M d, Y H:i" }}</td>
                         <td>

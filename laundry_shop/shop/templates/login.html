@@ -68,14 +68,14 @@
             cursor: pointer;
             font-size: 18px;
             color: #666;
-            padding: 0; /* Remove default button padding */
+            padding: 0; 
         }
 
         input:focus {
             border-color: #3498db;
         }
 
-        button[type="submit"] { /* Target only the submit button */
+        button[type="submit"] { 
             width: 100%;
             padding: 12px;
             background: #3498db;
@@ -106,7 +106,6 @@
             text-decoration: underline;
         }
         
-        /* Shop Owner Links Styling */
         .shop-links {
             margin-top: 20px; 
             padding-top: 20px; 
@@ -121,25 +120,25 @@
 
         .shop-links-container a {
             padding: 8px 16px; 
-            border-radius: 8px; /* Consistent rounded corners */
+            border-radius: 8px; 
             text-decoration: none; 
             font-size: 14px; 
             font-weight: 500;
-            color: white; /* Ensure text is white */
+            color: white; 
             transition: opacity 0.3s ease;
         }
         
         .shop-links-container a:hover {
             opacity: 0.9;
-            text-decoration: none; /* Override default underline hover */
+            text-decoration: none; 
         }
 
         .shop-login-btn {
-            background: #28a745; /* Green */
+            background: #28a745;
         }
 
         .shop-register-btn {
-            background: #17a2b8; /* Cyan */
+            background: #17a2b8; 
         }
 
     </style>
@@ -204,7 +203,6 @@
         const type = passwordInput.type === "password" ? "text" : "password";
         passwordInput.type = type;
 
-        // Toggle Font Awesome icon classes
         if (type === "password") {
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');

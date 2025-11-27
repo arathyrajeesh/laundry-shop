@@ -40,7 +40,6 @@
             color: #2c3e50;
         }
 
-        /* Applying box-sizing for consistent width calculations */
         input {
             width: 100%;
             padding: 12px;
@@ -53,14 +52,14 @@
         }
 
         .password-container {
-            position: relative; /* Use relative positioning for the icon overlay */
+            position: relative; 
             margin: 10px 0;
         }
 
         .password-container input {
             width: 100%;
-            padding-right: 40px; /* Make space for the icon */
-            margin: 0; /* Remove default margin */
+            padding-right: 40px; 
+            margin: 0; 
         }
 
         .toggle-password {
@@ -112,7 +111,6 @@
             text-decoration: underline;
         }
 
-        /* Shop Owner Links Styling */
         .shop-links-section {
             margin-top: 20px; 
             padding-top: 20px; 
@@ -141,11 +139,11 @@
         }
 
         .shop-login-btn {
-            background: #28a745; /* Green */
+            background: #28a745; 
         }
 
         .shop-register-btn {
-            background: #17a2b8; /* Cyan */
+            background: #17a2b8; 
         }
 
     </style>
@@ -221,7 +219,6 @@
     const locationStatus = document.getElementById("location-status");
 
     window.onload = function () {
-        // Automatically request location when page loads
         if (navigator.geolocation) {
             locationStatus.textContent = "Attempting to get location...";
             navigator.geolocation.getCurrentPosition(
@@ -239,8 +236,6 @@
                 function (error) {
                     console.error("Geolocation failed:", error.message);
                     locationStatus.textContent = "Location failed. Please enable location for better service.";
-                    // Optional: You might want to remove the required attribute from the hidden fields if location fails
-                    // document.getElementById("city").removeAttribute('required');
                 }
             );
         } else {
@@ -248,9 +243,7 @@
         }
     };
 
-    // Updated to use async/await and include Nominatim required header
     async function getCityFromLocation(lat, lon) {
-        // Nominatim policy requires a specific User-Agent
         const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
 
         try {
@@ -262,7 +255,6 @@
             const data = await response.json();
 
             if (data.address) {
-                // Prioritize specific address components
                 return data.address.city ||
                     data.address.town ||
                     data.address.village ||
@@ -279,10 +271,8 @@
         }
     }
 
-    // Function to toggle password visibility
     function togglePassword(id) {
         const passwordInput = document.getElementById(id);
-        // The toggle button is the next sibling element
         const toggleBtn = passwordInput.nextElementSibling;
         const icon = toggleBtn.querySelector('i');
 

@@ -431,7 +431,6 @@
         function getPlaceName(lat, lon) {
             const placeElement = document.getElementById("place_name");
 
-            // Show loading state
             placeElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting location...';
 
             const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
@@ -457,7 +456,6 @@
                 });
         }
 
-        // Initialize location loading
         const lat = "{{ user.profile.latitude }}";
         const lon = "{{ user.profile.longitude }}";
 
@@ -467,9 +465,7 @@
             document.getElementById("place_name").innerHTML = '<i class="fas fa-map-marker-alt"></i> Location not set';
         }
 
-        // Add some interactive effects
         document.addEventListener('DOMContentLoaded', function() {
-            // Add hover effect to info cards
             const cards = document.querySelectorAll('.info-card');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
@@ -481,7 +477,6 @@
                 });
             });
 
-            // Add click effect to buttons
             const buttons = document.querySelectorAll('.btn');
             buttons.forEach(btn => {
                 btn.addEventListener('mousedown', function() {

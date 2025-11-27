@@ -484,7 +484,6 @@
             }
         }
 
-        // Simple search functionality
         document.querySelector('.search-btn').addEventListener('click', function() {
             const query = document.querySelector('.search-input').value.toLowerCase();
             if (query.trim() === '') {
@@ -492,14 +491,13 @@
                 return;
             }
 
-            // Simple search through FAQ questions
             const faqQuestions = document.querySelectorAll('.faq-question');
             let found = false;
 
             faqQuestions.forEach(question => {
                 const text = question.textContent.toLowerCase();
                 if (text.includes(query)) {
-                    question.click(); // Expand the FAQ
+                    question.click(); 
                     question.scrollIntoView({ behavior: 'smooth' });
                     found = true;
                 }
@@ -510,7 +508,6 @@
             }
         });
 
-        // Allow Enter key in search
         document.querySelector('.search-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 document.querySelector('.search-btn').click();

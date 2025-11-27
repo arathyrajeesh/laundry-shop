@@ -248,7 +248,6 @@
     </div>
 
     <div class="container">
-        <!-- Shop Header -->
         <div class="shop-header">
             <h1>Select Your Services</h1>
             {% if branch %}
@@ -261,7 +260,6 @@
             {% endif %}
         </div>
 
-        <!-- Services Section -->
         <div class="section">
             <h2><i class="fas fa-concierge-bell"></i> Available Services</h2>
             {% if services %}
@@ -299,7 +297,6 @@
             {% endif %}
         </div>
 
-        <!-- Total Section -->
         <div class="section" id="total-section" style="display: none;">
             <h2><i class="fas fa-calculator"></i> Order Summary</h2>
             <div style="text-align: center; padding: 20px;">
@@ -311,7 +308,6 @@
             </div>
         </div>
 
-        <!-- Proceed Section -->
         {% if services %}
             <div class="proceed-section">
                 <h3>Ready to proceed with your order?</h3>
@@ -351,16 +347,13 @@
                 }
             });
 
-            // Update total display
             document.getElementById('total-amount').textContent = `₹${total.toFixed(2)}`;
 
-            // Update services list
             const servicesList = document.getElementById('services-list');
             servicesList.innerHTML = selectedServices.length > 0 ?
                 selectedServices.map(service => `<div>${service}</div>`).join('') :
                 '<div>No services selected</div>';
 
-            // Show/hide total section
             const totalSection = document.getElementById('total-section');
             totalSection.style.display = selectedServices.length > 0 ? 'block' : 'none';
         }

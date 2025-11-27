@@ -348,7 +348,6 @@
             padding: 0 4px;
         }
 
-        /* Search Bar Styles */
         .search-form {
             display: flex;
             gap: 10px;
@@ -409,7 +408,6 @@
             text-decoration: underline;
         }
 
-        /* Notifications Section */
         .notifications-section {
             background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
             padding: 30px;
@@ -515,7 +513,6 @@
             opacity: 0.5;
         }
 
-        /* Notification type colors */
         .notification-order-placed .notification-icon { background: #28a745; }
         .notification-status-update .notification-icon { background: #17a2b8; }
         .notification-ready-pickup .notification-icon { background: #f39c12; }
@@ -548,7 +545,6 @@
                     <a href="{% url 'edit_profile' %}" class="view-profile-btn">Edit Profile</a>
                 </div>
 
-                <!-- Notifications Section -->
                 <div class="dropdown-section-title" style="display: flex; align-items: center; justify-content: space-between;">
                     <span>Notifications</span>
                     {% if unread_count > 0 %}
@@ -596,7 +592,6 @@
     </div>
 
     <div class="section-container">
-                <!-- Search Bar Section -->
                 <div class="mb-10">
                     <h2 class="section-heading">🔍 Search for laundry services</h2>
             <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 3px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
@@ -604,7 +599,7 @@
                     <input type="text" name="search" value="{{ search_query }}" class="search-input"
                             placeholder="Search for laundry services (e.g., wash & fold, dry cleaning)...">
                     <button type="submit" class="search-btn">
-                        🔍 Search
+                        Search
                     </button>
                 </form>
                 {% if search_query %}
@@ -616,9 +611,8 @@
             </div>
         </div>
 
-        <!-- Services Near You -->
         <div class="mb-10">
-            <h2 class="section-heading">🧺 Services Near You</h2>
+            <h2 class="section-heading"> Services Near You</h2>
             {% if services_nearby %}
                 <div class="shop-grid">
                     {% for service in services_nearby %}
@@ -659,9 +653,8 @@
             {% endif %}
         </div>
 
-        <!-- Shops Near You -->
         <div class="mb-10">
-            <h2 class="section-heading">🏪 Laundry Shops Near You</h2>
+            <h2 class="section-heading"> Laundry Shops Near You</h2>
             {% if shops_nearby %}
                 <div class="shop-grid">
                     {% for shop in shops_nearby %}
@@ -678,7 +671,7 @@
                 <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 3px 15px rgba(0,0,0,0.1); text-align: center;">
                     {% if not user_city %}
                         <p class="empty-message">
-                            📍 <strong>City Required</strong><br>
+                            📍<strong>City Required</strong><br>
                             To find shops near you, please update your city in your profile settings.
                         </p>
                         <a href="{% url 'edit_profile' %}" class="btn" style="margin-top: 15px;">Update City</a>
@@ -692,7 +685,7 @@
         </div>
 
         <div>
-            <h2 class="section-heading">🧺 Your Cloth Status</h2>
+            <h2 class="section-heading">Your Cloth Status</h2>
             <table class="status-table">
                 <thead>
                     <tr>
@@ -725,7 +718,6 @@
             </table>
         </div>
 
-        <!-- Notifications Section -->
         <div class="notifications-section">
             <div class="notifications-header">
                 <h3><i class="fas fa-bell"></i> Recent Notifications</h3>
@@ -762,9 +754,7 @@
             var dropdown = document.getElementById('profile-dropdown-menu');
             dropdown.classList.toggle('show');
 
-            // Mark notifications as read when profile dropdown is opened
             if (dropdown.classList.contains('show')) {
-                // Send AJAX request to mark notifications as read
                 fetch('/notifications/mark-read/', {
                     method: 'POST',
                     headers: {
@@ -776,7 +766,6 @@
                 .then(data => {
                     if (data.success) {
                         console.log('Notifications marked as read');
-                        // Hide notification badges in the dropdown
                         var badges = dropdown.querySelectorAll('.notification-badge');
                         badges.forEach(function(badge) {
                             badge.style.display = 'none';
@@ -789,7 +778,6 @@
             }
         });
 
-        // Optional: Close dropdown if user clicks outside
         window.addEventListener('click', function(e) {
             var container = document.querySelector('.profile-pic-container');
             if (!container.contains(e.target) && document.getElementById('profile-dropdown-menu').classList.contains('show')) {
@@ -797,7 +785,6 @@
             }
         });
 
-        // Get CSRF token from cookies
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {

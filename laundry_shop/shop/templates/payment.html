@@ -168,9 +168,7 @@
         }
     </style>
 
-    <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
 </head>
 <body>
@@ -184,7 +182,6 @@
     </div>
 
     <div class="container">
-        <!-- Order Summary -->
         <div class="payment-section">
             <h2><i class="fas fa-shopping-cart"></i> Order Summary</h2>
 
@@ -223,7 +220,6 @@
                     </button>
                 </div>
 
-                <!-- UPI QR Modal -->
                 <div id="upi-qr-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
                     <div class="modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; border-radius: 10px; text-align: center;">
                         <span class="close" onclick="closeUPIQR()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
@@ -248,19 +244,16 @@
                 order_id: '{{ razorpay_order_id }}',
                 method: method,
                 handler: function (response) {
-                    // Handle successful payment
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = '{% url "payment_success" %}';
 
-                    // Add CSRF token
                     const csrfToken = document.createElement('input');
                     csrfToken.type = 'hidden';
                     csrfToken.name = 'csrfmiddlewaretoken';
                     csrfToken.value = '{{ csrf_token }}';
                     form.appendChild(csrfToken);
 
-                    // Add payment details
                     const paymentId = document.createElement('input');
                     paymentId.type = 'hidden';
                     paymentId.name = 'razorpay_payment_id';
@@ -291,13 +284,11 @@
                 },
                 modal: {
                     ondismiss: function() {
-                        // Handle payment cancellation
                         window.location.href = '{% url "payment_failed" %}';
                     }
                 }
             };
 
-            // Add UPI app if specified
             if (method === 'upi' && upiApp) {
                 options.upi_app = upiApp;
             }
@@ -307,13 +298,10 @@
         }
 
         function showUPIQR() {
-            // Generate UPI payment string
             const upiString = `upi://pay?pa=arathyrajeesh050@okaxis&pn={{ shop.name }}&am={{ total_amount }}&cu=INR&tn=Laundry Order #{{ order.id }}`;
 
-            // Clear previous QR code
             document.getElementById('qrcode').innerHTML = '';
 
-            // Generate QR code
             QRCode.toCanvas(document.getElementById('qrcode'), upiString, {
                 width: 200,
                 height: 200,
@@ -325,7 +313,6 @@
                 if (error) console.error(error);
             });
 
-            // Show modal
             document.getElementById('upi-qr-modal').style.display = 'block';
         }
 
@@ -333,7 +320,6 @@
             document.getElementById('upi-qr-modal').style.display = 'none';
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('upi-qr-modal');
             if (event.target == modal) {

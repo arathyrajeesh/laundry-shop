@@ -65,7 +65,6 @@
             font-size: 14px;
         }
 
-        /* Applying box-sizing for consistency */
         input {
             width: 100%;
             padding: 12px 15px;
@@ -83,11 +82,11 @@
         }
 
         .password-container {
-            position: relative; /* Changed to relative for icon placement */
+            position: relative; 
         }
 
         .password-container input {
-            padding-right: 40px; /* Space for the icon */
+            padding-right: 40px; 
         }
 
         .toggle-password {
@@ -122,7 +121,6 @@
             background: #0a2538;
         }
         
-        /* Style for the Detect Location button */
         #detectLocationBtn {
             width: 100%; 
             padding: 12px; 
@@ -289,14 +287,13 @@
 
                     statusDiv.innerHTML = "Location detected! Getting city information...";
 
-                    // Get city from coordinates using async/await
                     const city = await getCityFromLocation(lat, lon);
                     
                     if (city && city !== "Unknown City") {
                         document.getElementById("city").value = city;
-                        statusDiv.innerHTML = `✅ Location detected: **${city}**`;
+                        statusDiv.innerHTML = `Location detected: **${city}**`;
                     } else {
-                        statusDiv.innerHTML = "⚠️ Location detected, but could not retrieve city. Please enter it manually.";
+                        statusDiv.innerHTML = "Location detected, but could not retrieve city. Please enter it manually.";
                     }
                     
                     locationBtn.disabled = false;
@@ -304,33 +301,30 @@
                 },
                 function(error) {
                     console.error("Geolocation failed:", error.message);
-                    statusDiv.innerHTML = "❌ Location access denied. Please enter your city manually.";
+                    statusDiv.innerHTML = "Location access denied. Please enter your city manually.";
                     locationBtn.disabled = false;
                     locationBtn.innerHTML = INITIAL_BTN_TEXT;
                 }
             );
         } else {
-            statusDiv.innerHTML = "❌ Geolocation not supported by your browser.";
+            statusDiv.innerHTML = "Geolocation not supported by your browser.";
             locationBtn.disabled = false;
             locationBtn.innerHTML = INITIAL_BTN_TEXT;
         }
     });
 
-    // Uses async/await and includes the required User-Agent header for Nominatim
     async function getCityFromLocation(lat, lon) {
         const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
 
         try {
             const response = await fetch(url, {
                 headers: {
-                    // REQUIRED by Nominatim usage policy. Replace with your actual contact info.
                     'User-Agent': 'ShineAndBrightLaundryApp/1.0 (contact@yourdomain.com)' 
                 }
             });
             const data = await response.json();
 
             if (data.address) {
-                // Prioritize specific address components for best result
                 return data.address.city ||
                     data.address.town ||
                     data.address.village ||

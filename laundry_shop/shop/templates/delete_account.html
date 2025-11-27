@@ -185,7 +185,6 @@
     </div>
 
     <script>
-        // Enable/disable delete button based on checkbox
         document.getElementById('confirmDelete').addEventListener('change', function() {
             const deleteBtn = document.getElementById('deleteBtn');
             deleteBtn.disabled = !this.checked;
@@ -197,7 +196,6 @@
             }
         });
 
-        // Form submission confirmation
         document.getElementById('deleteForm').addEventListener('submit', function(e) {
             const confirmed = confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.');
             if (!confirmed) {

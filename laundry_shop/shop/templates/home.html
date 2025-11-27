@@ -1041,7 +1041,6 @@
         </div>
     </footer>
 
-    <!-- Combined Widget: Up Arrow and Chatbot -->
     <div class="combined-widget">
         <div class="up-arrow-btn" id="up-arrow-btn">
             <i class="fas fa-arrow-up"></i>
@@ -1072,7 +1071,6 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
-    // 1. SERVICES CAROUSEL (Original)
     var swiper = new Swiper(".mySwiper", {
         loop: true,
         centeredSlides: true,
@@ -1092,7 +1090,6 @@
         }
     });
 
-    // 2. PRICING CAROUSEL (NEW)
     var pricingSwiper = new Swiper(".pricing-swiper", {
         loop: true,
         spaceBetween: 20,
@@ -1102,13 +1099,12 @@
             clickable: true,
         },
         breakpoints: {
-            480: { slidesPerView: 1.1, spaceBetween: 20, centeredSlides: true }, // One card + hint on small mobile
-            768: { slidesPerView: 2, spaceBetween: 30 }, // Two cards on tablet
-            1024: { slidesPerView: 3, spaceBetween: 30 }  // Three cards on desktop
+            480: { slidesPerView: 1.1, spaceBetween: 20, centeredSlides: true }, 
+            768: { slidesPerView: 2, spaceBetween: 30 }, 
+            1024: { slidesPerView: 3, spaceBetween: 30 }  
         }
     });
 
-    // CHATBOT FUNCTIONALITY
     const chatbotToggler = document.getElementById('chatbot-toggler');
     const chatbot = document.querySelector('.chatbot');
     const chatbotMessages = document.getElementById('chatbot-messages');
@@ -1171,7 +1167,6 @@
         }
     });
 
-    // Minimize and Close Chat
     document.getElementById('minimize-chat').addEventListener('click', () => {
         chatbot.classList.remove('show');
     });
@@ -1180,7 +1175,6 @@
         chatbot.classList.remove('show');
     });
 
-    // BACK-TO-TOP BUTTON FUNCTIONALITY
     const upArrowBtn = document.getElementById('up-arrow-btn');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 300) {

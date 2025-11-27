@@ -356,7 +356,6 @@
 
     <script>
         document.getElementById("detectBtn").addEventListener("click", function () {
-            // Show loading state
             const btn = this;
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting...';
@@ -378,14 +377,12 @@
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            // Update input fields with animation
             const latInput = document.getElementById("latitude");
             const lonInput = document.getElementById("longitude");
 
             latInput.value = lat.toFixed(6);
             lonInput.value = lon.toFixed(6);
 
-            // Add success animation
             latInput.style.borderColor = '#28a745';
             lonInput.style.borderColor = '#28a745';
 
@@ -394,7 +391,6 @@
                 lonInput.style.borderColor = '';
             }, 2000);
 
-            // Reset button
             btn.innerHTML = originalText;
             btn.disabled = false;
 
@@ -418,7 +414,6 @@
 
             alert(message);
 
-            // Reset button
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
@@ -442,11 +437,9 @@
 
                         placeResult.innerHTML = `<i class="fas fa-map-pin"></i> ${city}`;
 
-                        // Auto-populate city field if empty
                         const cityField = document.getElementById("id_city");
                         if (cityField && !cityField.value) {
                             cityField.value = city;
-                            // Add highlight effect
                             cityField.style.borderColor = '#28a745';
                             setTimeout(() => {
                                 cityField.style.borderColor = '';
@@ -461,7 +454,6 @@
                 });
         }
 
-        // File input preview
         document.getElementById("{{ form.profile_image.id_for_label }}").addEventListener("change", function(e) {
             const file = e.target.files[0];
             if (file) {

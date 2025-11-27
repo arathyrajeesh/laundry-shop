@@ -28,7 +28,6 @@
             --info-color: #3498db;
         }
 
-        /* Header */
         .header {
             background: white;
             padding: 20px 40px;
@@ -80,14 +79,12 @@
             background: #5a6268;
         }
 
-        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px 40px;
         }
 
-        /* Branch Info */
         .branch-info {
             background: white;
             padding: 30px;
@@ -109,7 +106,6 @@
             margin-bottom: 5px;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -165,7 +161,6 @@
             font-size: 14px;
         }
 
-        /* Section */
         .dashboard-section {
             background: white;
             padding: 30px;
@@ -188,7 +183,6 @@
             font-size: 24px;
         }
 
-        /* Table */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -215,7 +209,6 @@
             background: #f8f9fa;
         }
 
-        /* Status Badge */
         .status-badge {
             padding: 5px 12px;
             border-radius: 20px;
@@ -325,7 +318,6 @@
             </div>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-card-header">
@@ -388,7 +380,6 @@
             </div>
         </div>
 
-        <!-- Services Management -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-concierge-bell"></i> Services for {{ branch.name }}</h2>
@@ -443,7 +434,6 @@
             {% endif %}
         </div>
 
-        <!-- Orders -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-receipt"></i> Orders for {{ branch.name }}</h2>

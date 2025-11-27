@@ -79,14 +79,13 @@
             box-shadow: 0 0 0 3px rgba(15, 51, 75, 0.1);
         }
 
-        /* --- New Password Container Styling --- */
         .password-container {
-            position: relative; /* Base for positioning the toggle icon */
+            position: relative; 
             width: 100%;
         }
 
         .password-container input {
-            padding-right: 40px; /* Space for the icon */
+            padding-right: 40px; 
         }
         
         .toggle-password {
@@ -102,7 +101,6 @@
             padding: 5px;
             z-index: 10;
         }
-        /* ------------------------------------- */
 
         button[type="submit"] {
             width: 100%;
@@ -215,7 +213,6 @@
         const type = passwordInput.type === "password" ? "text" : "password";
         passwordInput.type = type;
 
-        // Toggle Font Awesome icon classes
         if (type === "password") {
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');

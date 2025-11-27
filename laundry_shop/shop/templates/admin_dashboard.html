@@ -29,7 +29,7 @@
             --info-color: #3498db;
         }
 
-        /* Header */
+
         .admin-header {
             background: white;
             padding: 20px 40px;
@@ -81,15 +81,13 @@
         .btn-secondary:hover {
             background: #5a6268;
         }
-
-        /* Container */
         .admin-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px 40px;
         }
 
-        /* Stats Grid */
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -128,11 +126,21 @@
             color: white;
         }
 
-        .icon-blue { background: var(--info-color); }
-        .icon-green { background: var(--accent-color); }
-        .icon-orange { background: var(--warning-color); }
-        .icon-red { background: var(--danger-color); }
-        .icon-purple { background: #9b59b6; }
+        .icon-blue {
+            background: var(--info-color); 
+        }
+        .icon-green { 
+            background: var(--accent-color); 
+        }
+        .icon-orange {
+            background: var(--warning-color); 
+        }
+        .icon-red { 
+            background: var(--danger-color); 
+        }
+        .icon-purple {
+            background: #9b59b6; 
+        }
 
         .stat-card-value {
             font-size: 32px;
@@ -146,7 +154,6 @@
             font-size: 14px;
         }
 
-        /* Section */
         .dashboard-section {
             background: white;
             padding: 30px;
@@ -169,7 +176,6 @@
             font-size: 24px;
         }
 
-        /* Table */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -196,7 +202,6 @@
             background: #f8f9fa;
         }
 
-        /* Status Badge */
         .status-badge {
             padding: 5px 12px;
             border-radius: 20px;
@@ -205,14 +210,31 @@
             display: inline-block;
         }
 
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-washing { background: #d1ecf1; color: #0c5460; }
-        .status-drying { background: #d4edda; color: #155724; }
-        .status-ironing { background: #e2e3e5; color: #383d41; }
-        .status-ready { background: #cce5ff; color: #004085; }
-        .status-completed { background: #d4edda; color: #155724; }
+        .status-pending {
+            background: #fff3cd; 
+            color: #856404; 
+        }
+        .status-washing { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+        }
+        .status-drying { 
+            background: #d4edda; 
+            color: #155724; 
+        }
+        .status-ironing { 
+            background: #e2e3e5; 
+            color: #383d41; 
+        }
+        .status-ready { 
+            background: #cce5ff; 
+            color: #004085; 
+        }
+        .status-completed { 
+            background: #d4edda; 
+            color: #155724; 
+        }
 
-        /* Quick Actions */
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -247,7 +269,6 @@
             font-weight: 600;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -260,7 +281,6 @@
             opacity: 0.5;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .admin-container {
                 padding: 20px 15px;
@@ -286,7 +306,6 @@
             }
         }
 
-        /* Status Select */
         .status-select {
             padding: 5px 10px;
             border-radius: 5px;
@@ -436,7 +455,6 @@
             </div>
         </div>
 
-        <!-- Quick Actions -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
@@ -461,7 +479,6 @@
             </div>
         </div>
 
-        <!-- Recent Orders -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-receipt"></i> Recent Orders</h2>
@@ -516,7 +533,6 @@
             {% endif %}
         </div>
 
-        <!-- Orders by Status -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-chart-pie"></i> Orders by Status</h2>
@@ -550,7 +566,6 @@
             {% endif %}
         </div>
 
-        <!-- Recent Users -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-user-friends"></i> Recent Users</h2>
@@ -591,7 +606,7 @@
             {% endif %}
         </div>
 
-        <!-- Recent Branches -->
+
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-map-marker-alt"></i> Recent Branches</h2>
@@ -635,7 +650,6 @@
             {% endif %}
         </div>
 
-        <!-- Shops and Their Branches -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-store"></i> Shops and Branches</h2>
@@ -725,12 +739,12 @@
             const statusSelect = document.getElementById(`status-${orderId}`);
             const newStatus = statusSelect.value;
 
-            // Create form data
+
             const formData = new FormData();
             formData.append('status', newStatus);
             formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-            // Send AJAX request
+
             fetch(`/admin-panel/order/${orderId}/update-status/`, {
                 method: 'POST',
                 body: formData,
@@ -742,7 +756,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Order status updated successfully!');
-                    location.reload(); // Reload to show updated status
+                    location.reload(); 
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -803,7 +817,6 @@
             }
         }
 
-        // Get CSRF token from cookies
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {

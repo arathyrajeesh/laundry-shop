@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-uq4j(!x9=wx^ss1u)xxl8rv_q!_gmk_7&n1fwsn()%%#kycj3l'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-uq4j(!x9=wx^ss1u)xxl8rv_q!_gmk_7&n1fwsn()%%#kycj3l')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -131,18 +133,18 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 
-EMAIL_HOST_USER = 'brightandshine48@gmail.com'
-EMAIL_HOST_PASSWORD = 'suijwzvjpczfgajn'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your-email@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your-app-password')
 
 # Login URL for redirecting unauthenticated users
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 
 # Razorpay Configuration
-RAZORPAY_KEY_ID = 'rzp_test_Rij5vlig4waLpC'  # Replace with your actual Razorpay Key ID
-RAZORPAY_KEY_SECRET = 'eL02Z8hmoLl0j88j67n7JJ3e'  # Replace with your actual Razorpay Key Secret
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='your-razorpay-key-id')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='your-razorpay-key-secret')

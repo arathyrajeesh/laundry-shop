@@ -14,6 +14,9 @@ class Profile(models.Model):
     longitude = models.CharField(max_length=100, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
 
+    # Email verification
+    email_verified = models.BooleanField(default=False, help_text="Whether the user's email has been verified")
+
     # Notification settings
     notifications_enabled = models.BooleanField(default=True, help_text="Enable notification badges and alerts")
 

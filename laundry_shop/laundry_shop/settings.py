@@ -12,22 +12,42 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
-from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file if it exists
+if os.path.exists(BASE_DIR / '.env'):
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(BASE_DIR / '.env')
+    except ImportError:
+        pass  # dotenv not available, use os.environ
+
+def get_env_var(key, default=None, cast=None):
+    """Get environment variable with optional casting."""
+    value = os.getenv(key, default)
+    if cast and value is not None:
+        if cast == bool:
+            if isinstance(value, str):
+                return value.lower() in ('true', '1', 'yes', 'on')
+            return bool(value)
+        elif cast == int:
+            return int(value)
+        elif callable(cast):
+            return cast(value)
+    return value
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-uq4j(!x9=wx^ss1u)xxl8rv_q!_gmk_7&n1fwsn()%%#kycj3l')
+SECRET_KEY = get_env_var('SECRET_KEY', 'django-insecure-uq4j(!x9=wx^ss1u)xxl8rv_q!_gmk_7&n1fwsn()%%#kycj3l')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = get_env_var('DEBUG', True, bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = get_env_var('ALLOWED_HOSTS', 'localhost,127.0.0.1', lambda v: [s.strip() for s in v.split(',')])
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -133,18 +153,21 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your-email@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your-app-password')
+# Email Configuration
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = get_env_var('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+    EMAIL_HOST = get_env_var('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = get_env_var('EMAIL_PORT', 587, int)
+    EMAIL_USE_TLS = get_env_var('EMAIL_USE_TLS', True, bool)
+    EMAIL_HOST_USER = get_env_var('EMAIL_HOST_USER', 'your-email@gmail.com')
+    EMAIL_HOST_PASSWORD = get_env_var('EMAIL_HOST_PASSWORD', 'your-app-password')
 
 # Login URL for redirecting unauthenticated users
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 
 # Razorpay Configuration
-RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='your-razorpay-key-id')
-RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='your-razorpay-key-secret')
+RAZORPAY_KEY_ID = get_env_var('RAZORPAY_KEY_ID', 'your-razorpay-key-id')
+RAZORPAY_KEY_SECRET = get_env_var('RAZORPAY_KEY_SECRET', 'your-razorpay-key-secret')

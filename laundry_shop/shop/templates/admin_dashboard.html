@@ -306,28 +306,6 @@
             }
         }
 
-        .status-select {
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .update-btn {
-            padding: 5px 15px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-
-        .update-btn:hover {
-            background: #27ae60;
-        }
     </style>
 </head>
 <body>
@@ -486,7 +464,7 @@
             <div class="quick-actions">
                 <a href="{% url 'admin_orders' %}" class="action-card">
                     <i class="fas fa-list-alt"></i>
-                    <h3>Manage Orders</h3>
+                    <h3>View Orders</h3>
                 </a>
                 <a href="{% url 'admin_users' %}" class="action-card">
                     <i class="fas fa-user-cog"></i>
@@ -506,7 +484,7 @@
         <div class="dashboard-section">
             <div class="section-header">
                 <h2><i class="fas fa-receipt"></i> Recent Orders</h2>
-                <a href="{% url 'admin_orders' %}" class="btn btn-primary">View All</a>
+                <a href="{% url 'admin_orders' %}" class="btn btn-primary">View All Orders</a>
             </div>
             {% if recent_orders %}
             <table class="data-table">
@@ -518,7 +496,6 @@
                         <th>Status</th>
                         <th>Amount</th>
                         <th>Date</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -532,19 +509,6 @@
                         </td>
                         <td>₹{{ order.amount|floatformat:2 }}</td>
                         <td>{{ order.created_at|date:"M d, Y" }}</td>
-                        <td>
-                            <select class="status-select" id="status-{{ order.id }}">
-                                <option value="Pending" {% if order.cloth_status == "Pending" %}selected{% endif %}>Pending</option>
-                                <option value="Washing" {% if order.cloth_status == "Washing" %}selected{% endif %}>Washing</option>
-                                <option value="Drying" {% if order.cloth_status == "Drying" %}selected{% endif %}>Drying</option>
-                                <option value="Ironing" {% if order.cloth_status == "Ironing" %}selected{% endif %}>Ironing</option>
-                                <option value="Ready" {% if order.cloth_status == "Ready" %}selected{% endif %}>Ready for Pickup</option>
-                                <option value="Completed" {% if order.cloth_status == "Completed" %}selected{% endif %}>Completed</option>
-                            </select>
-                            <button class="update-btn" onclick="updateOrderStatus({{ order.id }})">
-                                Update
-                            </button>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -758,38 +722,6 @@
         </div>
     </div>
 
-    <script>
-        function updateOrderStatus(orderId) {
-            const statusSelect = document.getElementById(`status-${orderId}`);
-            const newStatus = statusSelect.value;
-
-
-            const formData = new FormData();
-            formData.append('status', newStatus);
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-
-            fetch(`/admin-panel/order/${orderId}/update-status/`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Order status updated successfully!');
-                    location.reload(); 
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while updating the order status.');
-            });
-        }
 
         function approveShop(shopId) {
             if (confirm('Are you sure you want to approve this shop?')) {

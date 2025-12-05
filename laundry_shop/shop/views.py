@@ -17,7 +17,8 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, JsonResponse # Added for placeholder views
 from django.db.models import Count, Q
-from datetime import datetime, timezone
+from datetime import datetime
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 import uuid
 from django.http import HttpResponseRedirect
@@ -118,6 +119,40 @@ def login_page(request):
 
         if user is not None:
             login(request, user)
+
+            # Send login success email
+            login_message = f"""
+Hi {user.username},
+
+You have successfully logged in to your Shine & Bright Laundry account.
+
+Login Details:
+- Username: {user.username}
+- Email: {user.email}
+- Login Time: {timezone.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+
+If this login was not initiated by you, please contact our support team immediately and consider changing your password.
+
+For your security, we recommend:
+- Using a strong, unique password
+- Enabling two-factor authentication if available
+- Regularly monitoring your account activity
+
+Thank you for using Shine & Bright!
+
+Best regards,
+Shine & Bright Team
+🧺✨
+"""
+
+            send_mail(
+                subject="Login Successful - Shine & Bright",
+                message=login_message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+
             messages.success(request, "Login successful!")
             # Redirect to 'next' parameter if present, otherwise check user type
             next_url = request.GET.get('next') or request.POST.get('next')
@@ -143,8 +178,8 @@ def signup(request):
 
         username = request.POST.get("username")
         email = request.POST.get("email")
-        password1 = request.POST.get("password1")
-        password2 = request.POST.get("password2")
+        password1 = request.POST.get("password")
+        password2 = request.POST.get("password_confirm")
 
         latitude = request.POST.get("latitude")
         longitude = request.POST.get("longitude")
@@ -153,6 +188,10 @@ def signup(request):
         # Password check
         if password1 != password2:
             messages.error(request, "Passwords do not match")
+            return redirect("signup")
+
+        if len(password1) < 8:
+            messages.error(request, "Password must be at least 8 characters long")
             return redirect("signup")
 
         # Username check
@@ -168,31 +207,58 @@ def signup(request):
         # Create user
         user = User.objects.create_user(username=username, email=email, password=password1)
 
-        # Create Profile on Signup (NOTE: Profile should be created automatically via a signal if not here)
-        # Using get_or_create defensively
-        profile, created = Profile.objects.get_or_create(user=user)
-        profile.latitude = latitude
-        profile.longitude = longitude
-        profile.city = city
-        profile.save()
+        # Update Profile with location data (Profile is created automatically via signal)
+        try:
+            profile = user.profile
+            profile.latitude = latitude
+            profile.longitude = longitude
+            profile.city = city
+            profile.save()
+        except Exception as e:
+            # Profile creation/update failed, but don't fail signup
+            pass
+
+        # Create welcome notifications
+        create_welcome_notifications(user)
 
         # Send Welcome Email
         welcome_message = f"""
 Hi {username},
 
-Welcome to Bright & Shine! 
+Welcome to Shine & Bright Laundry Services! 🧺✨
 
-Your account has been created successfully.
+Your account has been created successfully. We're excited to have you join our community of satisfied customers who trust us for their laundry needs.
 
-Enjoy our laundry services anytime — fast & clean! 
+What you can do now:
+• Browse and discover nearby laundry shops
+• Place orders for washing, dry cleaning, and ironing services
+• Track your orders in real-time
+• Manage your profile and preferences
+• Receive notifications about your orders
+
+Your login credentials:
+- Username: {username}
+- Email: {email}
+
+For your security, we recommend:
+• Setting up your profile with your city information for personalized recommendations
+• Keeping your password secure and not sharing it with others
+
+If you have any questions or need assistance, feel free to contact our support team.
+
+Thank you for choosing Shine & Bright!
+
+Best regards,
+Shine & Bright Team
+🧺✨
 """
 
         send_mail(
-            subject="Welcome to Bright & Shine",
+            subject="Welcome to Shine & Bright - Account Created Successfully!",
             message=welcome_message,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
-            fail_silently=False,
+            fail_silently=True,
         )
 
         messages.success(request, "Account created successfully! Check your email.")
@@ -383,7 +449,7 @@ Shine & Bright Team
                 message=password_change_message,
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[user.email],
-                fail_silently=False,
+                fail_silently=True,
             )
 
             messages.success(request, 'Your password was successfully updated! A confirmation email has been sent.')
@@ -437,7 +503,7 @@ Shine & Bright Team
                 message=deletion_message,
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[user_email],
-                fail_silently=False,
+                fail_silently=True,
             )
         except:
             # Continue with deletion even if email fails
@@ -683,6 +749,94 @@ def create_order(request, shop_id):
     request.session['razorpay_order_id'] = razorpay_order['id']
     request.session['total_amount'] = float(total_amount)
 
+    # Send order notification emails to admin and shop
+    try:
+        # Get admin email (first superuser or staff user)
+        admin_user = User.objects.filter(is_superuser=True).first() or User.objects.filter(is_staff=True).first()
+        admin_email = admin_user.email if admin_user else settings.EMAIL_HOST_USER
+
+        # Prepare order details
+        order_items_text = "\n".join([
+            f"- {item['service_name']} (x{item['quantity']}) - ₹{item['total']}"
+            for item in request.session.get('order_items', [])
+        ])
+
+        # Email to Admin
+        admin_subject = f"New Order Placed - Order #{order.id}"
+        admin_message = f"""
+Dear Admin,
+
+A new order has been placed on Shine & Bright Laundry System.
+
+Order Details:
+- Order ID: #{order.id}
+- Customer: {request.user.username} ({request.user.email})
+- Shop: {shop.name}
+- Branch: {branch.name if branch else 'Main Branch'}
+- Total Amount: ₹{total_amount}
+
+Order Items:
+{order_items_text}
+
+Delivery Details:
+- Name: {order.delivery_name or 'Not provided yet'}
+- Address: {order.delivery_address or 'Not provided yet'}
+- Phone: {order.delivery_phone or 'Not provided yet'}
+
+Please process this order promptly.
+
+Best regards,
+Shine & Bright System
+🧺✨
+"""
+
+        # Email to Shop Owner
+        shop_subject = f"New Order Received - Order #{order.id}"
+        shop_message = f"""
+Dear {shop.name} Team,
+
+You have received a new order on Shine & Bright Laundry System.
+
+Order Details:
+- Order ID: #{order.id}
+- Customer: {request.user.username}
+- Customer Email: {request.user.email}
+- Branch: {branch.name if branch else 'Main Branch'}
+- Total Amount: ₹{total_amount}
+
+Order Items:
+{order_items_text}
+
+Please prepare to process this order. The customer will provide delivery details shortly.
+
+You can manage this order through your shop dashboard.
+
+Best regards,
+Shine & Bright System
+🧺✨
+"""
+
+        # Send emails
+        send_mail(
+            subject=admin_subject,
+            message=admin_message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[admin_email],
+            fail_silently=True,
+        )
+
+        send_mail(
+            subject=shop_subject,
+            message=shop_message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[shop.email],
+            fail_silently=True,
+        )
+
+    except Exception as e:
+        # Log the error but don't fail the order process
+        print(f"Failed to send order notification emails: {e}")
+
     # Redirect to user details page
     return redirect('user_details')
 
@@ -804,7 +958,7 @@ Shine & Bright Team
                     message=payment_success_message,
                     from_email=settings.EMAIL_HOST_USER,
                     recipient_list=[order.user.email],
-                    fail_silently=False,
+                    fail_silently=True,
                 )
             except Exception as e:
                 # Log the error but don't fail the payment
@@ -934,8 +1088,83 @@ def admin_update_order_status(request, order_id):
         new_status = request.POST.get('status')
         
         if new_status in dict(Order.STATUS_CHOICES):
+            old_status = order.cloth_status
             order.cloth_status = new_status
             order.save()
+
+            # Send status update notification emails
+            try:
+                # Email to Customer
+                customer_subject = f"Order Status Updated - Order #{order.id}"
+                customer_message = f"""
+Hi {order.user.get_full_name() or order.user.username},
+
+Your order status has been updated!
+
+Order Details:
+- Order ID: #{order.id}
+- Shop: {order.shop.name}
+- Previous Status: {old_status}
+- New Status: {new_status}
+- Amount: ₹{order.amount}
+
+Delivery Information:
+- Name: {order.delivery_name or 'Not provided'}
+- Address: {order.delivery_address or 'Not provided'}
+- Phone: {order.delivery_phone or 'Not provided'}
+
+{'Your laundry is ready for pickup!' if new_status == 'Ready' else ''}
+{'Your order has been completed and delivered. Thank you for choosing us!' if new_status == 'Completed' else ''}
+
+You can track your order status in your dashboard.
+
+Best regards,
+Shine & Bright Team
+🧺✨
+"""
+
+                # Email to Shop (if status updated by admin)
+                if request.user.is_staff or request.user.is_superuser:
+                    shop_subject = f"Order Status Updated by Admin - Order #{order.id}"
+                    shop_message = f"""
+Dear {order.shop.name} Team,
+
+Order #{order.id} status has been updated by an administrator.
+
+Order Details:
+- Order ID: #{order.id}
+- Customer: {order.user.username}
+- Previous Status: {old_status}
+- New Status: {new_status}
+- Amount: ₹{order.amount}
+
+Please take appropriate action based on the new status.
+
+Best regards,
+Shine & Bright System
+🧺✨
+"""
+
+                    send_mail(
+                        subject=shop_subject,
+                        message=shop_message,
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[order.shop.email],
+                        fail_silently=True,
+                    )
+
+                # Send email to customer
+                send_mail(
+                    subject=customer_subject,
+                    message=customer_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[order.user.email],
+                    fail_silently=True,
+                )
+
+            except Exception as e:
+                print(f"Failed to send status update emails: {e}")
+
             return JsonResponse({'success': True, 'message': 'Order status updated successfully'})
         else:
             return JsonResponse({'success': False, 'message': 'Invalid status'}, status=400)
@@ -1039,8 +1268,8 @@ def shop_register(request):
     if request.method == "POST":
         shop_name = request.POST.get("shop_name")
         email = request.POST.get("email")
-        password1 = request.POST.get("password1")
-        password2 = request.POST.get("password2")
+        password1 = request.POST.get("password")
+        password2 = request.POST.get("password_confirm")
         address = request.POST.get("address", "")
         phone = request.POST.get("phone", "")
         latitude = request.POST.get("latitude", "")
@@ -1107,6 +1336,40 @@ def shop_login(request):
                 # Store shop ID in session
                 request.session['shop_id'] = shop.id
                 request.session['shop_name'] = shop.name
+
+                # Send login success email
+                login_message = f"""
+Hi {shop.name},
+
+You have successfully logged in to your Shine & Bright Laundry shop account.
+
+Login Details:
+- Shop Name: {shop.name}
+- Email: {shop.email}
+- Login Time: {timezone.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+
+If this login was not initiated by you, please contact our support team immediately and consider changing your password.
+
+For your security, we recommend:
+- Using a strong, unique password
+- Regularly monitoring your account activity
+- Keeping your shop information up to date
+
+Thank you for using Shine & Bright!
+
+Best regards,
+Shine & Bright Team
+🧺✨
+"""
+
+                send_mail(
+                    subject="Shop Login Successful - Shine & Bright",
+                    message=login_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[shop.email],
+                    fail_silently=True,
+                )
+
                 messages.success(request, f"Welcome back, {shop.name}!")
                 return redirect("shop_dashboard")
             else:
@@ -1430,8 +1693,87 @@ def shop_update_order_status(request, order_id):
         new_status = request.POST.get('status')
 
         if new_status in dict(Order.STATUS_CHOICES):
+            old_status = order.cloth_status
             order.cloth_status = new_status
             order.save()
+
+            # Send status update notification emails
+            try:
+                # Email to Customer
+                customer_subject = f"Order Status Updated - Order #{order.id}"
+                customer_message = f"""
+Hi {order.user.get_full_name() or order.user.username},
+
+Your order status has been updated by {order.shop.name}!
+
+Order Details:
+- Order ID: #{order.id}
+- Shop: {order.shop.name}
+- Branch: {order.branch.name if order.branch else 'Main Branch'}
+- Previous Status: {old_status}
+- New Status: {new_status}
+- Amount: ₹{order.amount}
+
+Delivery Information:
+- Name: {order.delivery_name or 'Not provided'}
+- Address: {order.delivery_address or 'Not provided'}
+- Phone: {order.delivery_phone or 'Not provided'}
+
+{'Your laundry is ready for pickup!' if new_status == 'Ready' else ''}
+{'Your order has been completed and delivered. Thank you for choosing us!' if new_status == 'Completed' else ''}
+
+You can track your order status in your dashboard.
+
+Best regards,
+{order.shop.name} Team
+🧺✨
+"""
+
+                # Email to Admin (when shop updates status)
+                admin_user = User.objects.filter(is_superuser=True).first() or User.objects.filter(is_staff=True).first()
+                if admin_user:
+                    admin_subject = f"Order Status Updated by Shop - Order #{order.id}"
+                    admin_message = f"""
+Dear Admin,
+
+Order #{order.id} status has been updated by {order.shop.name}.
+
+Order Details:
+- Order ID: #{order.id}
+- Customer: {order.user.username} ({order.user.email})
+- Shop: {order.shop.name}
+- Branch: {order.branch.name if order.branch else 'Main Branch'}
+- Previous Status: {old_status}
+- New Status: {new_status}
+- Amount: ₹{order.amount}
+
+The shop has updated the order status. Please review if necessary.
+
+Best regards,
+Shine & Bright System
+🧺✨
+"""
+
+                    send_mail(
+                        subject=admin_subject,
+                        message=admin_message,
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[admin_user.email],
+                        fail_silently=True,
+                    )
+
+                # Send email to customer
+                send_mail(
+                    subject=customer_subject,
+                    message=customer_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[order.user.email],
+                    fail_silently=True,
+                )
+
+            except Exception as e:
+                print(f"Failed to send status update emails: {e}")
+
             return JsonResponse({'success': True, 'message': 'Order status updated successfully'})
         else:
             return JsonResponse({'success': False, 'message': 'Invalid status'}, status=400)
